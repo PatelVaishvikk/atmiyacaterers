@@ -130,7 +130,7 @@ export default function TiffinPlans() {
               </div>
 
               <div className="flex-grow mb-6">
-                <h4 className="font-semibold text-gray-700 mb-3 text-center">What's Included:</h4>
+                <h4 className="font-semibold text-gray-700 mb-3 text-center">What is Included:</h4>
                 <ul className="text-gray-600 space-y-2 text-sm">
                   {plan.items.map((item, i) => (
                     <li key={i} className="flex items-start">
