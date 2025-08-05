@@ -1,20 +1,21 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'   // ← make sure this is imported
+import Image from 'next/image'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-
+ 
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'About', href: '/about' },
     { name: 'Services', href: '/services' },
+    { name: 'Tiffin Plans', href: '/tiffin-plans' },
     { name: 'Menu', href: '/menu' },
     { name: 'Gallery', href: '/gallery' },
     { name: 'Contact', href: '/contact' },
   ]
-
+ 
   return (
     <header className="bg-white shadow-lg sticky top-0 z-50">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,7 +37,7 @@ export default function Header() {
               </span>
             </Link>
           </div>
-
+ 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navigation.map((item) => (
@@ -52,7 +53,7 @@ export default function Header() {
               Get Quote
             </Link>
           </div>
-
+ 
           {/* Mobile menu button */}
           <div className="md:hidden">
             <button
@@ -65,7 +66,7 @@ export default function Header() {
             </button>
           </div>
         </div>
-
+ 
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden">
