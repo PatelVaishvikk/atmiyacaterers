@@ -134,7 +134,7 @@ export default function TiffinPlans() {
                 <ul className="text-gray-600 space-y-2 text-sm">
                   {plan.items.map((item, i) => (
                     <li key={i} className="flex items-start">
-                      <span className="text-orange-500 mr-2 mt-1">•</span>
+                      <span className="text-orange-500 mr-2 mt-1">&#8226;</span>
                       <span>{item}</span>
                     </li>
                   ))}
@@ -146,7 +146,7 @@ export default function TiffinPlans() {
                   Choose Plan
                 </button>
                 <p className="text-xs text-gray-500 text-center">
-                  Fresh delivery • All vegetarian • Home-style cooking
+                  Fresh delivery &bull; All vegetarian &bull; Home-style cooking
                 </p>
               </div>
             </motion.div>
@@ -159,15 +159,15 @@ export default function TiffinPlans() {
             <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
               <div>
                 <p className="font-medium text-gray-700 mb-2">Delivery Schedule:</p>
-                <p>• Weekday plans: Monday to Friday</p>
-                <p>• Full week plans: Monday to Sunday</p>
-                <p>• Fresh meals prepared daily</p>
+                <p>&bull; Weekday plans: Monday to Friday</p>
+                <p>&bull; Full week plans: Monday to Sunday</p>
+                <p>&bull; Fresh meals prepared daily</p>
               </div>
               <div>
                 <p className="font-medium text-gray-700 mb-2">Service Area:</p>
-                <p>• Windsor and surrounding areas</p>
-                <p>• Free delivery for monthly subscriptions</p>
-                <p>• Contact us for custom requirements</p>
+                <p>&bull; Windsor and surrounding areas</p>
+                <p>&bull; Free delivery for monthly subscriptions</p>
+                <p>&bull; Contact us for custom requirements</p>
               </div>
             </div>
           </div>
