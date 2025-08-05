@@ -166,7 +166,7 @@ export default function TiffinPlans() {
               <div>
                 <p className="font-medium text-gray-700 mb-2">Service Area:</p>
                 <p>&bull; Windsor and surrounding areas</p>
-                <p>&bull; Free delivery for monthly subscriptions</p>
+                {/* <p>&bull; Free delivery for monthly subscriptions</p> */}
                 <p>&bull; Contact us for custom requirements</p>
               </div>
             </div>
