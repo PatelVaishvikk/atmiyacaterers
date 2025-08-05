@@ -1,15 +1,17 @@
 'use client'
 import { motion } from 'framer-motion'
+import { useState } from 'react'
 
 const tiffinPlans = [
   {
     plan: "A Mini",
     category: "Light Meal",
-    items: ["6 oz Sabji", "6 Roti"],
+    items: ["8 oz Sabji", "6 Roti"],
     dailyPrice: 7.00,
     monthlyExclWeekends: 159.00,
     monthlyInclWeekends: 219.00,
-    popular: false
+    popular: false,
+    type: "A"
   },
   {
     plan: "A+",
@@ -18,7 +20,8 @@ const tiffinPlans = [
     dailyPrice: 10.00,
     monthlyExclWeekends: 199.00,
     monthlyInclWeekends: 279.00,
-    popular: false
+    popular: false,
+    type: "A"
   },
   {
     plan: "A Pro",
@@ -27,7 +30,8 @@ const tiffinPlans = [
     dailyPrice: 11.00,
     monthlyExclWeekends: 229.00,
     monthlyInclWeekends: 299.00,
-    popular: true
+    popular: true,
+    type: "A"
   },
   {
     plan: "A Pro Max",
@@ -36,7 +40,8 @@ const tiffinPlans = [
     dailyPrice: 14.00,
     monthlyExclWeekends: 299.00,
     monthlyInclWeekends: 399.00,
-    popular: false
+    popular: false,
+    type: "A"
   },
   {
     plan: "AA Mini",
@@ -45,7 +50,8 @@ const tiffinPlans = [
     dailyPrice: 9.00,
     monthlyExclWeekends: 199.00,
     monthlyInclWeekends: 279.00,
-    popular: false
+    popular: false,
+    type: "AA"
   },
   {
     plan: "AA+",
@@ -54,7 +60,8 @@ const tiffinPlans = [
     dailyPrice: 13.00,
     monthlyExclWeekends: 269.00,
     monthlyInclWeekends: 369.00,
-    popular: false
+    popular: false,
+    type: "AA"
   },
   {
     plan: "AA Pro",
@@ -63,7 +70,8 @@ const tiffinPlans = [
     dailyPrice: 14.00,
     monthlyExclWeekends: 299.00,
     monthlyInclWeekends: 399.00,
-    popular: false
+    popular: false,
+    type: "AA"
   },
   {
     plan: "AA Pro Max",
@@ -72,11 +80,19 @@ const tiffinPlans = [
     dailyPrice: 16.00,
     monthlyExclWeekends: 339.00,
     monthlyInclWeekends: 459.00,
-    popular: false
+    popular: false,
+    type: "AA"
   }
 ]
 
 export default function TiffinPlans() {
+  const [activeFilter, setActiveFilter] = useState('all')
+
+  const filteredPlans = tiffinPlans.filter(plan => {
+    if (activeFilter === 'all') return true
+    return plan.type === activeFilter
+  })
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -87,6 +103,72 @@ export default function TiffinPlans() {
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
             Choose a plan that fits your appetite and budget—all vegetarian, home-style meals delivered fresh.
           </p>
+          
+          {/* Filter Tabs */}
+          <div className="flex justify-center mb-6">
+            <div className="bg-white rounded-lg p-1 shadow-md">
+              <button
+                onClick={() => setActiveFilter('all')}
+                className={`px-6 py-2 rounded-md font-medium transition-all duration-200 ${
+                  activeFilter === 'all'
+                    ? 'bg-orange-500 text-white shadow-md'
+                    : 'text-gray-600 hover:text-orange-500'
+                }`}
+              >
+                All Plans
+              </button>
+              <button
+                onClick={() => setActiveFilter('A')}
+                className={`px-6 py-2 rounded-md font-medium transition-all duration-200 ${
+                  activeFilter === 'A'
+                    ? 'bg-orange-500 text-white shadow-md'
+                    : 'text-gray-600 hover:text-orange-500'
+                }`}
+              >
+                A Series 8 oz
+                <span className="block text-xs opacity-80">Regular Portions</span>
+              </button>
+              <button
+                onClick={() => setActiveFilter('AA')}
+                className={`px-6 py-2 rounded-md font-medium transition-all duration-200 ${
+                  activeFilter === 'AA'
+                    ? 'bg-orange-500 text-white shadow-md'
+                    : 'text-gray-600 hover:text-orange-500'
+                }`}
+              >
+                AA Series 12 oz
+                <span className="block text-xs opacity-80">Large Portions</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Portion Size Info */}
+          <div className="flex justify-center gap-4 mb-8">
+            <div className="text-sm text-gray-500 flex items-center gap-2">
+              <span>Portion Guide:</span>
+              {activeFilter === 'A' && (
+                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                  A Series: 8 oz portions
+                </span>
+              )}
+              {activeFilter === 'AA' && (
+                <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                  AA Series: 12 oz portions
+                </span>
+              )}
+              {activeFilter === 'all' && (
+                <>
+                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                    A: 8 oz portions
+                  </span>
+                  <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                    AA: 12 oz portions
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+
           <div className="flex justify-center gap-4 mb-8">
             <span className="text-sm text-gray-500">Monthly pricing includes:</span>
             <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
@@ -98,14 +180,42 @@ export default function TiffinPlans() {
           </div>
         </div>
         
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {tiffinPlans.map((plan) => (
+        <motion.div 
+          layout
+          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          {filteredPlans.map((plan) => (
             <motion.div
               key={plan.plan}
+              layout
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
               whileHover={{ scale: 1.02, y: -5 }}
               transition={{ duration: 0.2 }}
-              className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-100 relative flex flex-col"
+              className={`bg-white p-6 rounded-xl shadow-lg border-2 relative flex flex-col ${
+                plan.type === 'A' 
+                  ? 'border-blue-200 hover:border-blue-300' 
+                  : 'border-purple-200 hover:border-purple-300'
+              }`}
             >
+              {/* Type Badge */}
+              <div className="absolute -top-2 -right-2">
+                <span className={`px-2 py-1 rounded-full text-xs font-bold text-white ${
+                  plan.type === 'A' ? 'bg-blue-500' : 'bg-purple-500'
+                }`}>
+                  {plan.type} Series
+                </span>
+              </div>
+
+              {plan.popular && (
+                <div className="absolute -top-2 left-4">
+                  <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                    Most Popular
+                  </span>
+                </div>
+              )}
+
               <div className="text-center mb-4">
                 <h3 className="text-2xl font-bold text-gray-800 mb-1">
                   {plan.plan}
@@ -142,7 +252,11 @@ export default function TiffinPlans() {
               </div>
 
               <div className="space-y-3">
-                <button className="w-full py-3 px-4 rounded-lg font-semibold transition-colors bg-gray-800 hover:bg-gray-700 text-white">
+                <button className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${
+                  plan.type === 'A'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-purple-600 hover:bg-purple-700 text-white'
+                }`}>
                   Choose Plan
                 </button>
                 <p className="text-xs text-gray-500 text-center">
@@ -151,7 +265,7 @@ export default function TiffinPlans() {
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         <div className="mt-12 text-center">
           <div className="bg-white rounded-lg p-6 shadow-md max-w-4xl mx-auto">
@@ -166,7 +280,6 @@ export default function TiffinPlans() {
               <div>
                 <p className="font-medium text-gray-700 mb-2">Service Area:</p>
                 <p>&bull; Windsor and surrounding areas</p>
-                {/* <p>&bull; Free delivery for monthly subscriptions</p> */}
                 <p>&bull; Contact us for custom requirements</p>
               </div>
             </div>
