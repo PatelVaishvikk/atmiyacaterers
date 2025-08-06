@@ -7,9 +7,9 @@ const tiffinPlans = [
     plan: "A Mini",
     category: "Light Meal",
     items: ["8 oz Sabji", "6 Roti", "OR (8 oz Dal + 8 oz Rice)"],
-    dailyPrice: 8.00,
-    monthlyExclWeekends: 179.00,
-    monthlyInclWeekends: 239.00,
+    dailyPrice: 7.99,
+    monthlyExclWeekends: 178.99,
+    monthlyInclWeekends: 238.99,
     popular: false,
     type: "A"
   },
@@ -17,9 +17,9 @@ const tiffinPlans = [
     plan: "A+",
     category: "Standard Meal",
     items: ["8 oz Sabji", "5 Roti", "8 oz Dal", "8 oz Rice"],
-    dailyPrice: 10.00,
-    monthlyExclWeekends: 199.00,
-    monthlyInclWeekends: 279.00,
+    dailyPrice: 9.99,
+    monthlyExclWeekends: 198.99,
+    monthlyInclWeekends: 278.99,
     popular: false,
     type: "A"
   },
@@ -27,9 +27,9 @@ const tiffinPlans = [
     plan: "A Pro",
     category: "Complete Meal",
     items: ["8 oz Sabji", "5 Roti", "8 oz Dal", "8 oz Rice", "Raitu/Papad/Salad (Any Two)"],
-    dailyPrice: 11.00,
-    monthlyExclWeekends: 229.00,
-    monthlyInclWeekends: 299.00,
+    dailyPrice: 10.99,
+    monthlyExclWeekends: 228.99,
+    monthlyInclWeekends: 298.99,
     popular: true,
     type: "A"
   },
@@ -37,9 +37,9 @@ const tiffinPlans = [
     plan: "A Pro Max",
     category: "Premium Meal",
     items: ["8 oz Sabji", "7 Roti", "8 oz Dal", "8 oz Rice", "Raitu/Papad/Salad (Any Two)", "Sweet", "Farsan"],
-    dailyPrice: 14.00,
-    monthlyExclWeekends: 299.00,
-    monthlyInclWeekends: 399.00,
+    dailyPrice: 13.99,
+    monthlyExclWeekends: 298.99,
+    monthlyInclWeekends: 398.99,
     popular: false,
     type: "A"
   },
@@ -47,9 +47,9 @@ const tiffinPlans = [
     plan: "AA Mini",
     category: "Large Light Meal",
     items: ["12 oz Sabji", "8 Roti"],
-    dailyPrice: 9.50,
-    monthlyExclWeekends: 199.00,
-    monthlyInclWeekends: 279.00,
+    dailyPrice: 9.49,
+    monthlyExclWeekends: 198.99,
+    monthlyInclWeekends: 278.99,
     popular: false,
     type: "AA"
   },
@@ -57,9 +57,9 @@ const tiffinPlans = [
     plan: "AA+",
     category: "Large Standard",
     items: ["12 oz Sabji", "8 Roti", "8 oz Dal", "8 oz Rice"],
-    dailyPrice: 13.00,
-    monthlyExclWeekends: 269.00,
-    monthlyInclWeekends: 369.00,
+    dailyPrice: 12.99,
+    monthlyExclWeekends: 268.99,
+    monthlyInclWeekends: 368.99,
     popular: false,
     type: "AA"
   },
@@ -67,9 +67,9 @@ const tiffinPlans = [
     plan: "AA Pro",
     category: "Large Complete",
     items: ["12 oz Sabji", "8 Roti", "8 oz Dal", "8 oz Rice", "Raitu/Papad/Salad (Any Two)"],
-    dailyPrice: 14.00,
-    monthlyExclWeekends: 299.00,
-    monthlyInclWeekends: 399.00,
+    dailyPrice: 13.99,
+    monthlyExclWeekends: 298.99,
+    monthlyInclWeekends: 398.99,
     popular: false,
     type: "AA"
   },
@@ -77,9 +77,9 @@ const tiffinPlans = [
     plan: "AA Pro Max",
     category: "Large Premium",
     items: ["12 oz Sabji", "8 Roti", "8 oz Dal", "8 oz Rice", "Raitu/Papad/Salad (Any Two)", "Sweet", "Farsan"],
-    dailyPrice: 16.00,
-    monthlyExclWeekends: 339.00,
-    monthlyInclWeekends: 459.00,
+    dailyPrice: 15.99,
+    monthlyExclWeekends: 338.99,
+    monthlyInclWeekends: 458.99,
     popular: false,
     type: "AA"
   }
@@ -168,7 +168,7 @@ export default function TiffinPlans() {
               )}
             </div>
           </div>
-
+          
           <div className="flex justify-center gap-4 mb-8">
             <span className="text-sm text-gray-500">Monthly pricing includes:</span>
             <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
@@ -229,11 +229,11 @@ export default function TiffinPlans() {
                   <div className="space-y-1">
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-600">Monthly (weekdays):</span>
-                      <span className="font-semibold text-blue-600">${plan.monthlyExclWeekends}</span>
+                      <span className="font-semibold text-blue-600">${plan.monthlyExclWeekends.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-600">Monthly (all days):</span>
-                      <span className="font-semibold text-green-600">${plan.monthlyInclWeekends}</span>
+                      <span className="font-semibold text-green-600">${plan.monthlyInclWeekends.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -290,7 +290,7 @@ export default function TiffinPlans() {
                   Choose Plan
                 </button>
                 <p className="text-xs text-gray-500 text-center">
-                  Fresh delivery &bull; All vegetarian &bull; Home-style cooking
+                  Fresh delivery • All vegetarian • Home-style cooking
                 </p>
               </div>
             </motion.div>
@@ -303,14 +303,14 @@ export default function TiffinPlans() {
             <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
               <div>
                 <p className="font-medium text-gray-700 mb-2">Delivery Schedule:</p>
-                <p>&bull; Weekday plans: Monday to Friday</p>
-                <p>&bull; Full week plans: Monday to Sunday</p>
-                <p>&bull; Fresh meals prepared daily</p>
+                <p>• Weekday plans: Monday to Friday</p>
+                <p>• Full week plans: Monday to Sunday</p>
+                <p>• Fresh meals prepared daily</p>
               </div>
               <div>
                 <p className="font-medium text-gray-700 mb-2">Service Area:</p>
-                <p>&bull; Windsor and surrounding areas</p>
-                <p>&bull; Contact us for custom requirements</p>
+                <p>• Windsor and surrounding areas</p>
+                <p>• Contact us for custom requirements</p>
               </div>
             </div>
           </div>

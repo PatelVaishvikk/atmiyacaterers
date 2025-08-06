@@ -13,8 +13,8 @@ export const dailyMenu = [
     menuItems: [
       'Sev Tomato Sabji',
       'Roti (5 pcs)',
-      'Khichdi',
-      'Chaas'
+      'KhiKathivadi Khichdi',
+      'Masala Chaas'
     ],
     specialNote: '🎉 Swaminarayan Tiffin is now available! 🎉',
     pricing: {
