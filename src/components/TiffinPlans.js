@@ -6,10 +6,10 @@ const tiffinPlans = [
   {
     plan: "A Mini",
     category: "Light Meal",
-    items: ["8 oz Sabji", "6 Roti"],
-    dailyPrice: 7.00,
-    monthlyExclWeekends: 159.00,
-    monthlyInclWeekends: 219.00,
+    items: ["8 oz Sabji", "6 Roti", "OR (8 oz Dal + 8 oz Rice)"],
+    dailyPrice: 8.00,
+    monthlyExclWeekends: 179.00,
+    monthlyInclWeekends: 239.00,
     popular: false,
     type: "A"
   },
@@ -47,7 +47,7 @@ const tiffinPlans = [
     plan: "AA Mini",
     category: "Large Light Meal",
     items: ["12 oz Sabji", "8 Roti"],
-    dailyPrice: 9.00,
+    dailyPrice: 9.50,
     monthlyExclWeekends: 199.00,
     monthlyInclWeekends: 279.00,
     popular: false,
@@ -56,7 +56,7 @@ const tiffinPlans = [
   {
     plan: "AA+",
     category: "Large Standard",
-    items: ["12 oz Sabji", "6 Roti", "12 oz Dal", "12 oz Rice"],
+    items: ["12 oz Sabji", "8 Roti", "8 oz Dal", "8 oz Rice"],
     dailyPrice: 13.00,
     monthlyExclWeekends: 269.00,
     monthlyInclWeekends: 369.00,
@@ -66,7 +66,7 @@ const tiffinPlans = [
   {
     plan: "AA Pro",
     category: "Large Complete",
-    items: ["12 oz Sabji", "6 Roti", "12 oz Dal", "12 oz Rice", "Raitu/Papad/Salad (Any Two)"],
+    items: ["12 oz Sabji", "8 Roti", "8 oz Dal", "8 oz Rice", "Raitu/Papad/Salad (Any Two)"],
     dailyPrice: 14.00,
     monthlyExclWeekends: 299.00,
     monthlyInclWeekends: 399.00,
@@ -76,7 +76,7 @@ const tiffinPlans = [
   {
     plan: "AA Pro Max",
     category: "Large Premium",
-    items: ["12 oz Sabji", "6 Roti", "12 oz Dal", "12 oz Rice", "Raitu/Papad/Salad (Any Two)", "Sweet", "Farsan"],
+    items: ["12 oz Sabji", "8 Roti", "8 oz Dal", "8 oz Rice", "Raitu/Papad/Salad (Any Two)", "Sweet", "Farsan"],
     dailyPrice: 16.00,
     monthlyExclWeekends: 339.00,
     monthlyInclWeekends: 459.00,
@@ -223,7 +223,7 @@ export default function TiffinPlans() {
                 <p className="text-sm text-gray-500 mb-3">{plan.category}</p>
                 <div className="mb-4">
                   <div className="text-3xl font-bold text-orange-600 mb-2">
-                    ${plan.dailyPrice}
+                    ${plan.dailyPrice.toFixed(2)}
                     <span className="text-lg font-normal text-gray-500">/day</span>
                   </div>
                   <div className="space-y-1">
@@ -241,14 +241,44 @@ export default function TiffinPlans() {
 
               <div className="flex-grow mb-6">
                 <h4 className="font-semibold text-gray-700 mb-3 text-center">What is Included:</h4>
-                <ul className="text-gray-600 space-y-2 text-sm">
-                  {plan.items.map((item, i) => (
-                    <li key={i} className="flex items-start">
-                      <span className="text-orange-500 mr-2 mt-1">&#8226;</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
+                {plan.plan === "A Mini" ? (
+                  <div className="text-gray-600 text-sm">
+                    <ul className="space-y-2 mb-3">
+                      <li className="flex items-start">
+                        <span className="text-orange-500 mr-2 mt-1">&#8226;</span>
+                        <span>8 oz Sabji</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-orange-500 mr-2 mt-1">&#8226;</span>
+                        <span>6 Roti</span>
+                      </li>
+                    </ul>
+                    <div className="text-center my-4">
+                      <span className="bg-orange-100 text-orange-800 px-4 py-2 rounded-full font-bold text-lg">
+                        OR
+                      </span>
+                    </div>
+                    <ul className="space-y-2">
+                      <li className="flex items-start">
+                        <span className="text-orange-500 mr-2 mt-1">&#8226;</span>
+                        <span>8 oz Dal</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="text-orange-500 mr-2 mt-1">&#8226;</span>
+                        <span>8 oz Rice</span>
+                      </li>
+                    </ul>
+                  </div>
+                ) : (
+                  <ul className="text-gray-600 space-y-2 text-sm">
+                    {plan.items.map((item, i) => (
+                      <li key={i} className="flex items-start">
+                        <span className="text-orange-500 mr-2 mt-1">&#8226;</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <div className="space-y-3">
