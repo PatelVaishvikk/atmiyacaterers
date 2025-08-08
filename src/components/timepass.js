@@ -1,7 +1,7 @@
 'use client'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
-import { Plus, Minus, ShoppingCart, Sparkles } from 'lucide-react'
+import { Plus, Minus, ShoppingCart, Sparkles, Phone, X } from 'lucide-react'
 
 const basePlans = [
   {
@@ -42,10 +42,10 @@ const basePlans = [
 ]
 
 const addOnItems = [
-  { id: 'extra_sabji', name: 'Extra 1oz Sabji', price: 0.375 }, // 1.50/4 = 0.375 per oz
-  { id: 'extra_roti', name: 'Extra 1 Roti', price: 0.50 }, // 1.00/2 = 0.50 per roti
-  { id: 'extra_dal', name: 'Extra 1oz Dal', price: 0.30 }, // 1.20/4 = 0.30 per oz
-  { id: 'extra_rice', name: 'Extra 1oz Rice', price: 0.20 }, // 0.80/4 = 0.20 per oz
+  { id: 'extra_sabji', name: 'Extra 1oz Sabji', price: 0.375 },
+  { id: 'extra_roti', name: 'Extra 1 Roti', price: 0.50 },
+  { id: 'extra_dal', name: 'Extra 1oz Dal', price: 0.30 },
+  { id: 'extra_rice', name: 'Extra 1oz Rice', price: 0.20 },
   { id: 'raita', name: 'Raita', price: 1.50 },
   { id: 'papad', name: 'Papad', price: 0.75 },
   { id: 'salad', name: 'Fresh Salad', price: 1.25 },
@@ -56,62 +56,50 @@ const addOnItems = [
   { id: 'premium_sabji', name: 'Premium Sabji (Paneer/Special)', price: 2.50 }
 ]
 
-// Original plan pricing for reference
-const originalPlanPricing = {
-  'A Mini': 7.99,
-  'A+': 9.99,
-  'A Pro': 10.99,
-  'A Pro Max': 13.99,
-  'AA Mini': 9.49,
-  'AA+': 12.99,
-  'AA Pro': 13.99,
-  'AA Pro Max': 15.99
-}
-
 // Smart pricing combinations that match original plans
 const smartPricingRules = [
   {
     basePlan: 'mini',
-    addOns: { 'extra_sabji': 4, 'extra_roti': 2 }, // +4oz sabji, +2 roti = AA Mini equivalent
+    addOns: { 'extra_sabji': 4, 'extra_roti': 2 },
     targetPrice: 9.49,
     description: 'AA Mini equivalent'
   },
   {
     basePlan: 'plus', 
-    addOns: { 'extra_sabji': 4, 'extra_roti': 3 }, // A+ (5 roti) + 3 roti = AA+ (8 roti) equivalent
+    addOns: { 'extra_sabji': 4, 'extra_roti': 3 },
     targetPrice: 12.99,
     description: 'AA+ equivalent'
   },
   {
     basePlan: 'pro',
-    addOns: { 'extra_sabji': 4, 'extra_roti': 3 }, // A Pro (5 roti) + 3 roti = AA Pro (8 roti) equivalent  
+    addOns: { 'extra_sabji': 4, 'extra_roti': 3 },
     targetPrice: 13.99,
     description: 'AA Pro equivalent'
   },
   {
     basePlan: 'promax',
-    addOns: { 'extra_sabji': 4, 'extra_roti': 1 }, // Pro Max (7 roti) + 1 roti = AA Pro Max (8 roti)
+    addOns: { 'extra_sabji': 4, 'extra_roti': 1 },
     targetPrice: 15.99,
     description: 'AA Pro Max equivalent'
   },
-  // Additional smart combinations
   {
     basePlan: 'mini',
-    addOns: { 'raita': 2 }, // A Mini + 2 raita = A+ equivalent
+    addOns: { 'raita': 2 },
     targetPrice: 9.99,
     description: 'A+ equivalent'
   },
   {
     basePlan: 'plus',
-    addOns: { 'raita': 2 }, // A+ + raita/papad/salad = A Pro equivalent
+    addOns: { 'raita': 2 },
     targetPrice: 10.99,
-    description: 'A Pro equivalent'
+    description:'A Pro equivalent'
   }
 ]
 
 const portionUpgrades = [
   { id: 'large_portion', name: 'Upgrade to Large Portions (AA Series)', price: 2.00, description: 'All sabji portions become 12oz' }
 ]
+
 
 export default function CustomizableTiffinPlans() {
   const [selectedPlan, setSelectedPlan] = useState(null)
@@ -123,7 +111,7 @@ export default function CustomizableTiffinPlans() {
   const [orderType, setOrderType] = useState('') // 'direct' or 'custom'
 
   // Your restaurant's WhatsApp number (replace with actual number)
-  const restaurantWhatsApp = "5199927920" // Replace with your WhatsApp number
+  const restaurantWhatsApp = "15199927920" // Replace with your WhatsApp number (with country code)
 
   const getColorClasses = (color, variant = 'default') => {
     const colors = {
@@ -223,6 +211,10 @@ export default function CustomizableTiffinPlans() {
     }))
   }
 
+  const hasCustomizations = () => {
+    return Object.values(customizations).some(qty => qty > 0) || portionUpgrade || alternativeBase
+  }
+
   const generateWhatsAppMessage = (plan, isDirectOrder = false) => {
     const totalPrice = isDirectOrder ? plan.basePrice : calculateTotalPrice(plan)
     const monthlyPricing = calculateMonthlyPricing(totalPrice)
@@ -230,8 +222,14 @@ export default function CustomizableTiffinPlans() {
     let message = `🍛 *TIFFIN ORDER REQUEST* 🍛\n\n`
     message += `📋 *Plan:* ${plan.name} (${plan.category})\n`
     message += `💰 *Daily Price:* ${totalPrice.toFixed(2)}\n`
-    message += `📅 *Monthly (Weekdays):* ${monthlyPricing.weekdays.toFixed(2)}\n`
-    message += `📅 *Monthly (Full Week):* ${monthlyPricing.fullWeek.toFixed(2)}\n\n`
+    
+    // Only show monthly pricing for direct orders (no customizations)
+    if (isDirectOrder) {
+      message += `📅 *Monthly (Weekdays):* ${monthlyPricing.weekdays.toFixed(2)}\n`
+      message += `📅 *Monthly (Full Week):* ${monthlyPricing.fullWeek.toFixed(2)}\n\n`
+    } else {
+      message += `📅 *Monthly Pricing:* Please contact for custom pricing\n\n`
+    }
     
     message += `🍽️ *Items Included:*\n`
     
@@ -256,8 +254,8 @@ export default function CustomizableTiffinPlans() {
       }
       
       // Add customizations
-      const hasCustomizations = Object.values(customizations).some(qty => qty > 0)
-      if (hasCustomizations) {
+      const hasCustom = Object.values(customizations).some(qty => qty > 0)
+      if (hasCustom) {
         message += `\n*Extra Items:*\n`
         Object.entries(customizations).forEach(([itemId, quantity]) => {
           if (quantity > 0) {
@@ -275,13 +273,19 @@ export default function CustomizableTiffinPlans() {
     }
     
     message += `\n📱 *Customer Phone:* ${customerPhone}\n`
+    
+    if (!isDirectOrder) {
+      message += `\n💡 *Note:* This is a customized order. Please contact for monthly subscription pricing and delivery schedule.\n`
+    }
+    
     message += `\n✅ Please confirm this order and delivery details.\n`
     message += `📍 Service Area: Windsor and surrounding areas`
     
     return message
   }
 
-  const handleDirectOrder = (plan) => {
+  const handleDirectOrder = (plan, e) => {
+    e.stopPropagation() // Prevent plan selection
     setOrderType('direct')
     setSelectedPlan(plan)
     setShowPhoneInput(true)
@@ -381,7 +385,7 @@ export default function CustomizableTiffinPlans() {
                 <div className="mb-6">
                   <h4 className="font-semibold text-gray-700 mb-3">Base Includes:</h4>
                   <ul className="space-y-2 text-sm text-gray-600">
-                    {(plan.hasAlternative && alternativeBase ? plan.alternativeBase : plan.baseItems).map((item, i) => (
+                    {plan.baseItems.map((item, i) => (
                       <li key={i} className="flex items-center">
                         <span className={`w-2 h-2 ${getColorClasses(plan.color, 'bg')} rounded-full mr-2 flex-shrink-0`}></span>
                         {item}
@@ -397,15 +401,18 @@ export default function CustomizableTiffinPlans() {
                   )}
                 </div>
 
-                <button className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all transform hover:scale-105 ${getColorClasses(plan.color, 'button')}`}>
-                  Customize This Plan
-                </button>
-                <button 
-                  onClick={() => handleDirectOrder(plan)}
-                  className={`w-full py-2 px-4 rounded-lg font-medium border-2 transition-all hover:scale-105 ${getColorClasses(plan.color)} text-gray-700 hover:bg-gray-50`}
-                >
-                  Order Directly
-                </button>
+                <div className="space-y-2">
+                  <button className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all transform hover:scale-105 ${getColorClasses(plan.color, 'button')}`}>
+                    Customize This Plan
+                  </button>
+                  <button 
+                    onClick={(e) => handleDirectOrder(plan, e)}
+                    className={`w-full py-2 px-4 rounded-lg font-medium border-2 transition-all hover:scale-105 ${getColorClasses(plan.color)} text-gray-700 hover:bg-gray-50 flex items-center justify-center gap-2`}
+                  >
+                    <Phone className="w-4 h-4" />
+                    Order Directly
+                  </button>
+                </div>
               </motion.div>
             ))}
           </motion.div>
@@ -605,48 +612,37 @@ export default function CustomizableTiffinPlans() {
                       </div>
                       
                       {getSmartPricingMessage(selectedPlan) && (
-                        <div className="bg-green-100 text-green-800 px-3 py-2 rounded-lg text-sm text-center">
-                          🎉 Smart Price Match: <strong>{getSmartPricingMessage(selectedPlan)}</strong>
+                        <div className="bg-green-100 border border-green-200 rounded-lg p-3">
+                          <p className="text-sm text-green-800 font-medium">
+                            🎉 Smart Price Match: {getSmartPricingMessage(selectedPlan)}
+                          </p>
                         </div>
                       )}
                       
-                      <div className="text-sm space-y-1">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Monthly (weekdays only):</span>
-                          <span className="font-semibold text-blue-600">
-                            ${calculateMonthlyPricing(calculateTotalPrice(selectedPlan)).weekdays.toFixed(2)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Monthly (including weekends):</span>
-                          <span className="font-semibold text-green-600">
-                            ${calculateMonthlyPricing(calculateTotalPrice(selectedPlan)).fullWeek.toFixed(2)}
-                          </span>
-                        </div>
+                      <div className="text-xs text-gray-500 space-y-1">
+                        <p>Monthly estimates:</p>
+                        <p>• Weekdays only: ~${(calculateTotalPrice(selectedPlan) * 22).toFixed(2)}</p>
+                        <p>• Full week: ~${(calculateTotalPrice(selectedPlan) * 30).toFixed(2)}</p>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-3 pt-4">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`w-full py-4 px-6 rounded-xl font-bold text-white text-lg transition-all ${getColorClasses(selectedPlan.color, 'button')} shadow-lg`}
-                      >
-                        Order This Plan
-                      </motion.button>
+                      {hasCustomizations() && (
+                        <button
+                          onClick={resetCustomizations}
+                          className="w-full py-2 px-4 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+                        >
+                          Reset Customizations
+                        </button>
+                      )}
                       
                       <button
-                        onClick={resetCustomizations}
-                        className="w-full py-2 px-4 rounded-lg font-medium text-gray-600 hover:text-gray-800 transition-colors text-sm"
+                        onClick={handleCustomOrder}
+                        className={`w-full py-4 px-6 rounded-xl font-bold text-white text-lg transition-all transform hover:scale-105 ${getColorClasses(selectedPlan.color, 'button')} flex items-center justify-center gap-3`}
                       >
-                        Reset Customizations
+                        <Phone className="w-5 h-5" />
+                        Order via WhatsApp
                       </button>
-                    </div>
-                    
-                    <div className="text-center pt-4 border-t border-gray-200">
-                      <p className="text-xs text-gray-500">
-                        ✓ Fresh delivery daily • All vegetarian • Home-style cooking
-                      </p>
                     </div>
                   </div>
                 </div>
@@ -654,100 +650,85 @@ export default function CustomizableTiffinPlans() {
             </div>
           </motion.div>
         )}
-
-        {/* Info Section */}
-        <div className="mt-16 text-center">
-          <div className="bg-white rounded-2xl p-8 shadow-lg max-w-4xl mx-auto">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-6">Why Choose Our Custom Tiffin Service?</h3>
-            <div className="grid md:grid-cols-3 gap-6 text-sm text-gray-600">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full mx-auto mb-3 flex items-center justify-center">
-                  <Sparkles className="w-6 h-6" />
-                </div>
-                <p className="font-medium text-gray-700 mb-2">Fully Customizable</p>
-                <p>Build your perfect meal exactly how you want it with our flexible add-on system</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full mx-auto mb-3 flex items-center justify-center">
-                  <ShoppingCart className="w-6 h-6" />
-                </div>
-                <p className="font-medium text-gray-700 mb-2">Transparent Pricing</p>
-                <p>See exactly what you are paying for with real-time price updates as you customize</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full mx-auto mb-3 flex items-center justify-center">
-                  ❤️
-                </div>
-                <p className="font-medium text-gray-700 mb-2">Home-Style Quality</p>
-                <p>Fresh, vegetarian meals prepared daily with authentic Indian flavors and love</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Phone Input Modal */}
-      <AnimatePresence>
-        {showPhoneInput && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-          >
+        
+        {/* Phone Input Modal */}
+        <AnimatePresence>
+          {showPhoneInput && (
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-2xl p-6 max-w-md w-full"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
             >
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Complete Your Order</h3>
-              <p className="text-gray-600 mb-4">
-                Enter your phone number to send order details via WhatsApp
-              </p>
-              
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number *
-                </label>
-                <input
-                  type="tel"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  placeholder="e.g., +1234567890"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                  autoFocus
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Include country code (e.g., +1 for US/Canada)
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="bg-white rounded-2xl p-6 max-w-md w-full"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-800">Enter Your Phone Number</h3>
+                  <button
+                    onClick={() => {
+                      setShowPhoneInput(false)
+                      setCustomerPhone('')
+                      if (orderType === 'direct') {
+                        setSelectedPlan(null)
+                      }
+                      setOrderType('')
+                    }}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                
+                <p className="text-sm text-gray-600 mb-4">
+                  We will include your phone number in the WhatsApp message to help with order confirmation and delivery coordination.
                 </p>
-              </div>
-              
-              <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    setShowPhoneInput(false)
-                    setCustomerPhone('')
-                    if (orderType === 'direct') setSelectedPlan(null)
-                  }}
-                  className="flex-1 py-3 px-4 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={sendWhatsAppOrder}
-                  className="flex-1 py-3 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
-                  </svg>
-                  Send via WhatsApp
-                </button>
-              </div>
+                
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="e.g., (519) 123-4567"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    autoFocus
+                  />
+                </div>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowPhoneInput(false)
+                      setCustomerPhone('')
+                      if (orderType === 'direct') {
+                        setSelectedPlan(null)
+                      }
+                      setOrderType('')
+                    }}
+                    className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={sendWhatsAppOrder}
+                    className="flex-1 py-3 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Phone className="w-4 h-4" />
+                    Send Order
+                  </button>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      </div>
     </section>
   )
-}
+} 
+  // ... (rest of the JSX remains the same as in your complete code)
