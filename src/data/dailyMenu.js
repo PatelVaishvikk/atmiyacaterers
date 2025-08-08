@@ -7,14 +7,14 @@
 
 export const dailyMenu = [
   {
-    date: '7th August 2025',                           // YYYY-MM-DD
-    day: 'Thursday',
+    date: '8th August 2025',                           // YYYY-MM-DD
+    day: 'Friday',
     tiffinType: '🍽️ Lunch & Dinner',
     menuItems: [
-      'Dal Makhni',
-      'Paratha',
-      'Jira Rice',
-      'Mint Boondi Raytu'
+      'Ringan batata sabji',
+      'Roti',
+      'Daal',
+      'Rice'
     ],
     specialNote: '🎉 Swaminarayan Tiffin is now available! 🎉',
     pricing: {
@@ -34,12 +34,14 @@ export const dailyMenu = [
       dinnerBy: '7:00 PM'
     },
     addons: [
-      'Extra Paratha',
-      'Jira Rice',
-      'Additional Dal Makhni',
-      'Mint Boondi Raytu'
+      'Extra Roti',
+      'Rice',
+      'Dal',
+      'Sabji',
+      'Sweet',
+      'Farsan'
     ],
-    pickupAddress:    '📍 495 Curry Ave, Windsor',
+    pickupAddress:    '📍 867 Langlois Ave, Windsor',
     delivery: {
       free: true,
       note: '🚚 Free Delivery: Just DM your address'
