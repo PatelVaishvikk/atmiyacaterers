@@ -1399,7 +1399,7 @@ export default function CustomizableTiffinPlans() {
                       )}
                       
                       <div className="text-xs text-gray-500 space-y-1">
-                        <p>Monthly estimates:</p>
+                        <p>Monthly estimates: Need to Contact Atmiya Caterers</p>
                         <p>• Weekdays only: ~${(calculateTotalPrice(selectedPlan) * 22).toFixed(2)}</p>
                         <p>• Full week: ~${(calculateTotalPrice(selectedPlan) * 30).toFixed(2)}</p>
                       </div>
