@@ -7,7 +7,7 @@
 
 export const dailyMenu = [
   {
-    date: '8th August 2025',                           // YYYY-MM-DD
+    date: '2025-08-08',                          // YYYY-MM-DD
     day: 'Friday',
     tiffinType: '🍽️ Lunch & Dinner',
     menuItems: [
