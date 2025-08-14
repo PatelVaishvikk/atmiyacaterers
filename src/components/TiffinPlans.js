@@ -320,34 +320,52 @@ Please reply with the 4-digit code to CONFIRM this order. Thank you.`;
       </div>
 
       {/* Order Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Order {selectedPlan?.plan ?? "Plan"}</h3>
-            <div className="space-y-4">
+{showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
+             onClick={(e) => e.target === e.currentTarget && setShowModal(false)}>
+          <div className="bg-white rounded-lg w-full max-w-lg max-h-[95vh] flex flex-col"
+               onClick={(e) => e.stopPropagation()}>
+            {/* Modal Header - Sticky on mobile */}
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-4 rounded-t-lg z-10">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-800">Order {selectedPlan?.plan ?? "Plan"}</h3>
+                <button 
+                  onClick={() => setShowModal(false)}
+                  className="p-1 hover:bg-gray-100 rounded-full"
+                >
+                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4 overscroll-contain"
+                 style={{ WebkitOverflowScrolling: 'touch' }}>
               {/* Subscription */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Choose Subscription Type *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Choose Subscription Type *</label>
                 <div className="space-y-2">
                   {[
                     { key: "single", label: "Single Day", note: "Pay per day", value: selectedPlan?.dailyPrice?.toFixed(2) ?? "0.00", color: "text-orange-600" },
                     { key: "monthly-weekdays", label: "Monthly (Weekdays)", note: "Monday to Friday only", value: selectedPlan?.monthlyExclWeekends?.toFixed(2) ?? "0.00", color: "text-blue-600" },
                     { key: "monthly-all", label: "Monthly (All Days)", note: "Monday to Sunday", value: selectedPlan?.monthlyInclWeekends?.toFixed(2) ?? "0.00", color: "text-green-600" }
                   ].map(opt => (
-                    <label key={opt.key} className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                    <label key={opt.key} className="flex items-start sm:items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                       <input
                         type="radio"
                         name="subscription"
                         value={opt.key}
                         checked={subscriptionType === opt.key}
                         onChange={(e) => setSubscriptionType(e.target.value)}
-                        className="mr-3"
+                        className="mt-1 sm:mt-0 mr-3 flex-shrink-0"
                       />
-                      <div className="flex-grow">
-                        <div className="font-medium">{opt.label}</div>
-                        <div className="text-sm text-gray-500">{opt.note}</div>
+                      <div className="flex-grow min-w-0">
+                        <div className="font-medium text-sm sm:text-base">{opt.label}</div>
+                        <div className="text-xs sm:text-sm text-gray-500">{opt.note}</div>
                       </div>
-                      <div className={`font-bold ${opt.color}`}>${opt.value}</div>
+                      <div className={`font-bold text-sm sm:text-base ${opt.color} flex-shrink-0 ml-2`}>${opt.value}</div>
                     </label>
                   ))}
                 </div>
@@ -357,46 +375,55 @@ Please reply with the 4-digit code to CONFIRM this order. Thank you.`;
               <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
                 <div className="text-center">
                   <div className="text-sm text-gray-600 mb-1">Amount</div>
-                  <div className="text-2xl font-bold text-orange-600">
+                  <div className="text-xl sm:text-2xl font-bold text-orange-600">
                     ${getCurrentPrice(selectedPlan, subscriptionType).toFixed(2)}
                   </div>
-                  <div className="text-sm text-gray-500">{getSubscriptionLabel(subscriptionType)}</div>
+                  <div className="text-xs sm:text-sm text-gray-500">{getSubscriptionLabel(subscriptionType)}</div>
                 </div>
               </div>
 
               {/* Customer fields */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                <input type="text" name="name" value={formData.name} onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Enter your full name" />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                  <input type="text" name="name" value={formData.name} onChange={handleInputChange}
+                    className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
+                    placeholder="Enter your full name" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Delivery Address *</label>
+                  <textarea name="address" value={formData.address} onChange={handleInputChange} rows={3}
+                    className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-base resize-none"
+                    placeholder="Enter your complete delivery address" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange}
+                    className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-base"
+                    placeholder="Enter your phone number" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Meal Time *</label>
+                  <select name="mealTime" value={formData.mealTime} onChange={handleInputChange}
+                    className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-base">
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Address *</label>
-                <textarea name="address" value={formData.address} onChange={handleInputChange} rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Enter your complete delivery address" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
-                <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="Enter your phone number" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Meal Time *</label>
-                <select name="mealTime" value={formData.mealTime} onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                  <option value="lunch">Lunch</option>
-                  <option value="dinner">Dinner</option>
-                </select>
-              </div>
+            </div>
 
-              <div className="flex gap-3 mt-6">
+            {/* Modal Footer - Sticky on mobile */}
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-4 sm:px-6 py-4 rounded-b-lg">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button onClick={() => setShowModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">Cancel</button>
+                  className="w-full sm:flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium">
+                  Cancel
+                </button>
                 <button onClick={handleSubmit}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Send to Caterer</button>
+                  className="w-full sm:flex-1 px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium">
+                  Send to Caterer
+                </button>
               </div>
             </div>
           </div>
