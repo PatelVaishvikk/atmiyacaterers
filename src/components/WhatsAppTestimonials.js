@@ -126,7 +126,7 @@ const WhatsAppTestimonials = () => {
         setCurrentChat((prev) => (prev + 1) % customerReviews.length);
         setIsTransitioning(false);
       }, 500);
-    }, 7000);
+    }, 2000);
     return () => clearInterval(timer);
   }, []);
 
