@@ -12,9 +12,12 @@ export default function Header() {
     { name: 'Services',     href: '/services' },
     { name: 'Tiffin Plans', href: '/tiffin-plans' },
     { name: 'Menu',         href: '/menu' },
-    { name: 'Daily Menu',   href: '/daily-menu' },  // ← new link
-    { name: 'Gallery',      href: '/gallery' },
+    { name: 'Daily Menu',   href: '/daily-menu' },
+    { name: 'Gallery',      href: '/gallery' }, // ← added
     { name: 'Contact',      href: '/contact' },
+    { name: 'Testimonials',      href: '/testimonials' },
+    
+    // { name: 'Admin',        href: '/admin/testimonials' }, // optional (hide in prod)
   ]
 
   return (
@@ -48,7 +51,11 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
-            <Link href="/contact" className="btn-primary">
+            {/* use inline styles instead of .btn-primary to avoid missing util */}
+            <Link
+              href="/contact"
+              className="px-4 py-2 rounded-lg bg-primary text-white hover:opacity-90 transition"
+            >
               Get Quote
             </Link>
           </div>
@@ -58,6 +65,7 @@ export default function Header() {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-700 hover:text-primary focus:outline-none"
+              aria-label="Toggle Menu"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -83,7 +91,7 @@ export default function Header() {
               ))}
               <Link
                 href="/contact"
-                className="block px-3 py-2 btn-primary w-full text-center mt-4"
+                className="block px-3 py-2 w-full text-center mt-4 rounded-lg bg-primary text-white hover:opacity-90 transition"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Get Quote
@@ -93,5 +101,5 @@ export default function Header() {
         )}
       </nav>
     </header>
-)
+  )
 }

@@ -1,4 +1,5 @@
 import { servicesData } from '@/data/services'
+import Image from 'next/image'
 
 export default function Services() {
   return (
@@ -15,10 +16,21 @@ export default function Services() {
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {servicesData.map((service, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
-              <div className="h-48 bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <div className="text-6xl text-white">{service.icon}</div>
+            <div 
+              key={index} 
+              className="bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden"
+            >
+              {/* 👇 Replace gradient + icon with image */}
+              <div className="relative h-48 w-full">
+                <Image
+                  src={service.image}     // <-- add image path in servicesData
+                  alt={service.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
               </div>
+
               <div className="p-8">
                 <h3 className="text-2xl font-serif font-semibold text-secondary mb-4">
                   {service.title}

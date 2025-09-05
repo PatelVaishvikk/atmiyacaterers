@@ -1,0 +1,17 @@
+{
+  "live-pani-puri": {
+    "title": "Live Pani Puri Stall",
+    "description": "Street-style pani puri setup at your venue with hygiene and flair.",
+    "features": ["Unlimited rounds", "On-site chef", "Custom chutneys"]
+  },
+  "wedding-catering": {
+    "title": "Wedding Catering",
+    "description": "Full-service vegetarian wedding menus with premium presentation.",
+    "features": ["Buffet or plated", "Dessert stations", "Staff & setup"]
+  },
+  "corporate-lunches": {
+    "title": "Corporate Lunches",
+    "description": "Fresh, homestyle hot lunches delivered to your office.",
+    "features": ["Daily/weekly plans", "Dietary options", "On-time delivery"]
+  }
+}

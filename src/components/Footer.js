@@ -27,7 +27,7 @@ export default function Footer() {
               </a>
             </div>
           </div>
-          
+
           <div>
             <h3 className="text-xl font-semibold mb-6">Quick Links</h3>
             <ul className="space-y-3">
@@ -36,9 +36,10 @@ export default function Footer() {
               <li><Link href="/services" className="text-gray-300 hover:text-white transition-colors">Services</Link></li>
               <li><Link href="/menu" className="text-gray-300 hover:text-white transition-colors">Menu</Link></li>
               <li><Link href="/gallery" className="text-gray-300 hover:text-white transition-colors">Gallery</Link></li>
+              <li><Link href="/testimonials" className="text-gray-300 hover:text-white transition-colors">Testimonials</Link></li> {/* ← added */}
             </ul>
           </div>
-          
+
           <div>
             <h3 className="text-xl font-semibold mb-6">Services</h3>
             <ul className="space-y-3">
@@ -49,7 +50,7 @@ export default function Footer() {
               <li><span className="text-gray-300">Event Planning</span></li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="text-xl font-semibold mb-6">Contact Info</h3>
             <div className="space-y-3">
@@ -60,7 +61,7 @@ export default function Footer() {
             </div>
           </div>
         </div>
-        
+
         <div className="border-t border-gray-600 mt-12 pt-8 text-center">
           <p className="text-gray-300">
             © 2025 Atmiya Catering. All rights reserved. | Made with ❤️ for food lovers

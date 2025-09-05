@@ -1,5 +1,7 @@
 import Gallery from '@/components/Gallery'
 
-export default function GalleryPage() {
+export const metadata = { title: 'Gallery | Atmiya Caterers' }
+
+export default function Page() {
   return <Gallery />
 }
