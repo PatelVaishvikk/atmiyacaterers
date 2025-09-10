@@ -56,7 +56,7 @@ export default function Footer() {
             <div className="space-y-3">
               <p className="text-gray-300">📍 495 Curry Ave<br />Windsor</p>
               <p className="text-gray-300">📞 +1 5199927920</p>
-              <p className="text-gray-300">✉️ atmiyacaterers@gmail.com</p>
+              <p className="text-gray-300">✉️ atmiyacaters@gmail.com</p>
               <p className="text-gray-300">🕒 Mon-Sat: 8AM-8PM</p>
             </div>
           </div>
