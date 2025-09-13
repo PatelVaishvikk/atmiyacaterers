@@ -62,12 +62,27 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-600 mt-12 pt-8 text-center">
-          <p className="text-gray-300">
-            © 2025 Atmiya Catering. All rights reserved. | Made with ❤️ for food lovers
-          </p>
+ <div className="border-t border-gray-600 mt-12 pt-8 text-center">
+  <p className="text-gray-300 inline-block relative">
+    © 2025{' '}
+    <span className="relative">
+      <span>Atmiya Catering</span>
+      {/* Invisible admin link overlaying the words above */}
+      <Link
+        href="/admin"
+        prefetch={false}
+        aria-label="Open admin"
+        className="absolute inset-0 opacity-0 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-amber-500 rounded"
+      >
+        {/* empty – we just need a clickable area; becomes visible on keyboard focus */}
+      </Link>
+    </span>
+    . All rights reserved. | Made with ❤️ for food lovers
+  </p>
+</div>
+
         </div>
-      </div>
+      
     </footer>
   )
 }

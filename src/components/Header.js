@@ -1,24 +1,25 @@
-'use client'
-import { useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
+// src/components/Header.js
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navigation = [
     { name: 'Home',         href: '/' },
     { name: 'About',        href: '/about' },
     { name: 'Services',     href: '/services' },
     { name: 'Tiffin Plans', href: '/tiffin-plans' },
-    { name: 'Menu',         href: '/menu' },
-    { name: 'Daily Menu',   href: '/daily-menu' },
-    { name: 'Gallery',      href: '/gallery' }, // ← added
+    // { name: 'Menu',       href: '/menu' },
+    // { name: 'Daily Menu', href: '/daily-menu' },
+    { name: 'Gallery',      href: '/gallery' },
     { name: 'Contact',      href: '/contact' },
-    { name: 'Testimonials',      href: '/testimonials' },
-    
-    // { name: 'Admin',        href: '/admin/testimonials' }, // optional (hide in prod)
-  ]
+    { name: 'Testimonials', href: '/testimonials' },
+    { name: '🎭 Oder here', href: '/garba-booking', special: true },
+  ];
 
   return (
     <header className="bg-white shadow-lg sticky top-0 z-50">
@@ -46,12 +47,16 @@ export default function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-700 hover:text-primary font-medium transition-colors duration-200"
+                className={`font-medium transition-colors duration-200 ${
+                  item.special
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-blue-700'
+                    : 'text-gray-700 hover:text-primary'
+                }`}
               >
                 {item.name}
               </Link>
             ))}
-            {/* use inline styles instead of .btn-primary to avoid missing util */}
+
             <Link
               href="/contact"
               className="px-4 py-2 rounded-lg bg-primary text-white hover:opacity-90 transition"
@@ -83,12 +88,17 @@ export default function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block px-3 py-2 text-gray-700 hover:text-primary font-medium"
+                  className={`block px-3 py-2 font-medium transition-colors duration-200 ${
+                    item.special
+                      ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg mx-2 my-1 hover:from-purple-700 hover:to-blue-700'
+                      : 'text-gray-700 hover:text-primary'
+                  }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
                 </Link>
               ))}
+
               <Link
                 href="/contact"
                 className="block px-3 py-2 w-full text-center mt-4 rounded-lg bg-primary text-white hover:opacity-90 transition"
@@ -101,5 +111,5 @@ export default function Header() {
         )}
       </nav>
     </header>
-  )
+  );
 }

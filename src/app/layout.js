@@ -1,7 +1,7 @@
 // app/layout.js
 import './globals.css'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
+import ConditionalLayout from '@/components/ConditionalLayout'
+// import AdminAccessButton from '@/components/AdminAccessButton'
 
 export const metadata = {
   title: 'Atmiya Catering – Premium Catering Services',
@@ -15,15 +15,16 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        {/* Add Font Awesome for icons used in admin panel */}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+      </head>
       {/* suppressHydrationWarning silences React hydration mismatches on the client */}
       <body suppressHydrationWarning className="font-sans">
-        <Header />
-        {/* you can also scope this to just <main> if you prefer */}
-        <main suppressHydrationWarning>
-          {children}
-        </main>
-        <Footer />
+        <ConditionalLayout>{children}</ConditionalLayout>
+        {/* <AdminAccessButton /> */}
       </body>
     </html>
   )
 }
+

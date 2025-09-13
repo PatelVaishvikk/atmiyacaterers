@@ -1,30 +1,22 @@
 // src/lib/mongodb.js
-import { MongoClient, ObjectId } from "mongodb";
+import { MongoClient } from 'mongodb';
 
 const uri = process.env.MONGODB_URI;
-const dbName = process.env.MONGODB_DB || "atmiya_caterers";
+if (!uri) throw new Error('MONGODB_URI missing');
+const dbName = process.env.MONGODB_DB || 'atmiya_caterers';
 
-if (!uri) {
-  throw new Error("Please set MONGODB_URI in .env.local");
-}
-
-let client;
+const client = new MongoClient(uri, { serverSelectionTimeoutMS: 30000 });
 let clientPromise;
 
-if (process.env.NODE_ENV === "development") {
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri);
-    global._mongoClientPromise = client.connect();
-  }
+if (process.env.NODE_ENV === 'development') {
+  if (!global._mongoClientPromise) global._mongoClientPromise = client.connect();
   clientPromise = global._mongoClientPromise;
 } else {
-  client = new MongoClient(uri);
   clientPromise = client.connect();
 }
 
+export default clientPromise;
 export async function getDb() {
   const c = await clientPromise;
   return c.db(dbName);
 }
-
-export { ObjectId };
