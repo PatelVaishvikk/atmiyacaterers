@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Hero from '@/components/Hero';
+import HomeExperience from '@/components/HomeExperience';
 import Services from '@/components/Services';
 import HomeGallery from '@/components/HomeGallery';
 // import Testimonials from '@/components/Testimonials';
@@ -35,33 +36,34 @@ export default function Home() {
     window.dispatchEvent(new Event('storage'));
   };
 
-  if (!mounted) {
-    return (
-      <main>
-        <Hero />
-        <Services />
-        <HomeGallery />
-        {/* <Testimonials /> */}
-        <WhatsAppTestimonials />
-      </main>
-    );
-  }
-
-  return (
-    <main>
+  const pageContent = (
+    <>
       <Hero />
+      {/* <HomeExperience /> */}
       <Services />
       <HomeGallery />
       {/* <Testimonials /> */}
       <WhatsAppTestimonials />
+    </>
+  );
+
+  if (!mounted) {
+    return <main>{pageContent}</main>;
+  }
+
+  return (
+    <main>
+      {pageContent}
 
       {adminLoggedIn && (
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          zIndex: 1000
-        }}>
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            zIndex: 1000,
+          }}
+        >
           <a
             href="/admin"
             style={{
@@ -73,7 +75,7 @@ export default function Home() {
               textDecoration: 'none',
               fontWeight: 'bold',
               boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
             }}
           >
             <i className="fas fa-cog" style={{ marginRight: '8px' }}></i>
@@ -92,7 +94,7 @@ export default function Home() {
               borderRadius: '50px',
               fontWeight: 'bold',
               cursor: 'pointer',
-              width: '100%'
+              width: '100%',
             }}
           >
             <i className="fas fa-sign-out-alt" style={{ marginRight: '5px' }}></i>

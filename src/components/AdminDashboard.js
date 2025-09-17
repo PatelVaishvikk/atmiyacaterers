@@ -1,7 +1,65 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { defaultPlannerConfig, normalisePlannerConfig } from '@/data/plannerOptions';
 import BookingsManagement from './BookingsManagement';
+const ensureArray = value => (Array.isArray(value) ? value : [])
+
+const slugify = (input, fallback) => {
+  const base = (input || '').toString().trim().toLowerCase()
+  const slug = base.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  if (slug) {
+    return slug
+  }
+  const fb = (fallback || '').toString().trim().toLowerCase()
+  const fallbackSlug = fb.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  return fallbackSlug || `item-${Math.random().toString(36).slice(2, 8)}`
+}
+
+const defaultCourseKeys = ['starters', 'mains', 'breads', 'sweets', 'beverages']
+
+const convertCoursesToFields = courses => {
+  const result = {}
+  defaultCourseKeys.forEach(key => {
+    const values = ensureArray(courses?.[key])
+      result[key] = values.length ? values.join(String.fromCharCode(10)) : ''
+  })
+  Object.entries(courses || {}).forEach(([key, items]) => {
+    if (!Object.prototype.hasOwnProperty.call(result, key)) {
+      const values = ensureArray(items)
+      result[key] = values.length ? values.join(String.fromCharCode(10)) : ''
+    }
+  })
+  if (!Object.keys(result).length) {
+    defaultCourseKeys.forEach(key => {
+      result[key] = ''
+    })
+  }
+  return result
+}
+
+const convertFieldsToCourses = courses =>
+  Object.entries(courses || {}).reduce((acc, [key, value]) => {
+    const items = (value || '')
+      .split(/\r?\n/)
+      .map(item => item.trim())
+      .filter(Boolean)
+    if (items.length) {
+      acc[key] = items
+    }
+    return acc
+  }, {})
+
+const toNumber = value => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+const toOptionalNumber = value => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : undefined
+}
+
 
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -194,6 +252,13 @@ export default function AdminDashboard() {
             </a>
           </li>
           <li className="nav-item">
+            <a className={`nav-link ${activeSection === 'planner' ? 'active' : ''}`} 
+               onClick={() => setActiveSection('planner')}>
+              <i className="fas fa-clipboard-list"></i>
+              Planner Studio
+            </a>
+          </li>
+          <li className="nav-item">
             <a className="nav-link" href="/admin/checkin" target="_blank">
               <i className="fas fa-qrcode"></i>
               Check-In System
@@ -332,8 +397,19 @@ export default function AdminDashboard() {
           </section>
         )}
 
+        {activeSection === 'planner' && (
+          <section id="planner" className="content-section active">
+            <h2 className="section-title">
+              <i className="fas fa-clipboard-list"></i>
+              Planner Studio
+            </h2>
+            <PlannerManagement showMessage={showMessage} />
+          </section>
+        )}
+
         {activeSection === 'tiffin' && (
           <section id="tiffin" className="content-section active">
+
             <h2 className="section-title">
               <i className="fas fa-box"></i>
               Tiffin Plans Management
@@ -662,6 +738,399 @@ export default function AdminDashboard() {
           padding: 20px;
         }
 
+
+        .planner-wrapper {
+          display: flex;
+          flex-direction: column;
+          gap: 28px;
+        }
+        .planner-shell {
+          display: flex;
+          flex-direction: column;
+          gap: 28px;
+        }
+        .planner-headline-card {
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          border-radius: 26px;
+          padding: 28px;
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+        .planner-headline {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 24px;
+        }
+        .planner-headline__copy {
+          max-width: 540px;
+          color: #fff;
+        }
+        .planner-headline__eyebrow {
+          text-transform: uppercase;
+          letter-spacing: 0.18em;
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.65);
+          margin: 0 0 6px 0;
+        }
+        .planner-headline__title {
+          margin: 0;
+          font-size: 28px;
+        }
+        .planner-headline__subtitle {
+          margin: 8px 0 0 0;
+          color: rgba(255, 255, 255, 0.75);
+          font-size: 14px;
+          line-height: 1.6;
+        }
+        .planner-summary-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+          gap: 16px;
+        }
+        .planner-stat {
+          background: rgba(12, 18, 33, 0.45);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 18px;
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .planner-stat__value {
+          font-size: 24px;
+          font-weight: 600;
+          color: #fff;
+        }
+        .planner-stat__label {
+          font-size: 13px;
+          color: rgba(255, 255, 255, 0.75);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+        .planner-stat__hint {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.55);
+        }
+        .planner-toggle {
+          align-self: stretch;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          border-radius: 18px;
+          padding: 18px 20px;
+        }
+        .planner-admin-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+          gap: 28px;
+          align-items: flex-start;
+        }
+        .planner-nav {
+          position: sticky;
+          top: 80px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          background: rgba(12, 18, 33, 0.45);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 20px;
+          padding: 20px;
+          max-height: calc(100vh - 120px);
+          overflow: hidden;
+        }
+        .planner-nav__title {
+          margin: 0;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.14em;
+          color: rgba(255, 255, 255, 0.6);
+        }
+        .planner-nav__list {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          overflow-y: auto;
+          padding-right: 2px;
+        }
+        .planner-nav__item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          width: 100%;
+          border-radius: 16px;
+          border: 1px solid transparent;
+          background: rgba(255, 255, 255, 0.06);
+          color: rgba(255, 255, 255, 0.82);
+          padding: 12px 14px;
+          text-align: left;
+          transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+        .planner-nav__item:hover {
+          transform: translateX(2px);
+          background: rgba(255, 255, 255, 0.12);
+          border-color: rgba(255, 255, 255, 0.25);
+        }
+        .planner-nav__item.active {
+          border-color: rgba(255, 212, 130, 0.9);
+          background: linear-gradient(135deg, rgba(255, 212, 130, 0.22), rgba(255, 255, 255, 0.08));
+          color: #fff;
+        }
+        .planner-nav__index {
+          width: 28px;
+          height: 28px;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.12);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 13px;
+          font-weight: 600;
+          color: #fff;
+        }
+        .planner-nav__label {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          flex: 1;
+        }
+        .planner-nav__label-title {
+          font-size: 14px;
+          font-weight: 600;
+        }
+        .planner-nav__label-sub {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.6);
+        }
+        .planner-nav__count {
+          font-size: 12px;
+          font-weight: 600;
+          color: rgba(255, 255, 255, 0.75);
+        }
+        .planner-nav__actions {
+          margin-top: auto;
+          border-top: 1px solid rgba(255, 255, 255, 0.12);
+          padding-top: 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .planner-nav__actions-title {
+          margin: 0;
+          font-size: 12px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.55);
+        }
+        .planner-quick-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .planner-quick-button {
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          border-radius: 14px;
+          padding: 10px 12px;
+          color: rgba(255, 255, 255, 0.85);
+          font-size: 13px;
+          text-align: left;
+          transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .planner-quick-button:hover {
+          background: rgba(255, 255, 255, 0.16);
+          transform: translateX(2px);
+        }
+        .planner-content {
+          display: flex;
+          flex-direction: column;
+          gap: 28px;
+        }
+        .planner-section {
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 24px;
+          padding: 24px;
+        }
+        .planner-section__header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 14px;
+        }
+        .planner-section__title {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .planner-count-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 32px;
+          padding: 4px 10px;
+          border-radius: 999px;
+          font-size: 12px;
+          font-weight: 600;
+          background: rgba(255, 255, 255, 0.16);
+          color: #fff;
+        }
+        .planner-section__header h3 {
+          color: #fff;
+          margin: 0;
+          font-size: 20px;
+        }
+        .planner-section__description {
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 14px;
+          margin-bottom: 18px;
+        }
+        .planner-card {
+          background: rgba(12, 18, 33, 0.35);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 18px;
+          padding: 20px;
+          margin-bottom: 16px;
+        }
+        .planner-card:last-of-type {
+          margin-bottom: 0;
+        }
+        .card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 16px;
+        }
+        .card-header h4 {
+          color: #fff;
+          margin: 0;
+          font-size: 18px;
+        }
+        .card-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .btn-small {
+          padding: 6px 12px;
+          font-size: 13px;
+        }
+        .btn-link {
+          background: transparent;
+          border: none;
+          color: rgba(255, 255, 255, 0.7);
+          cursor: pointer;
+          font-size: 12px;
+          padding: 0;
+        }
+        .btn-link:hover {
+          color: #fff;
+        }
+        .field-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 16px;
+          margin-bottom: 16px;
+        }
+        .field {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          color: rgba(255, 255, 255, 0.82);
+          font-size: 14px;
+        }
+        .field input,
+        .field select,
+        .field textarea {
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 10px;
+          color: #fff;
+          padding: 10px 12px;
+          font-size: 14px;
+        }
+        .field textarea {
+          min-height: 80px;
+        }
+        .course-group-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 16px;
+        }
+        .course-label {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          color: rgba(255, 255, 255, 0.85);
+          font-size: 13px;
+          margin-bottom: 4px;
+        }
+        .empty-note {
+          color: rgba(255, 255, 255, 0.7);
+          font-style: italic;
+        }
+        .help-text {
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 13px;
+          margin-top: 6px;
+        }
+        .planner-actions {
+          position: sticky;
+          bottom: 24px;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+          gap: 16px;
+          background: rgba(5, 10, 22, 0.8);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 20px;
+          padding: 18px 24px;
+          box-shadow: 0 18px 40px rgba(5, 10, 22, 0.45);
+          backdrop-filter: blur(8px);
+        }
+        .message.info {
+          background: rgba(255, 255, 255, 0.15);
+          color: rgba(255, 255, 255, 0.9);
+        }
+        @media (max-width: 1200px) {
+          .planner-admin-layout {
+            grid-template-columns: minmax(0, 1fr);
+          }
+          .planner-nav {
+            position: static;
+            max-height: none;
+          }
+        }
+        @media (max-width: 900px) {
+          .planner-summary-grid {
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          }
+          .planner-nav {
+            flex-direction: column;
+            gap: 12px;
+          }
+        }
+        @media (max-width: 768px) {
+          .planner-headline__title {
+            font-size: 24px;
+          }
+          .planner-nav__list {
+            flex-direction: row;
+            overflow-x: auto;
+            padding-bottom: 4px;
+          }
+          .planner-nav__item {
+            min-width: 220px;
+          }
+          .planner-actions {
+            position: static;
+            justify-content: stretch;
+          }
+        }
         @media (max-width: 768px) {
           .admin-container {
             flex-direction: column;
@@ -802,7 +1271,7 @@ function MenuManagement({ items, setItems, showMessage, loading }) {
               type="text"
               value={formData.price}
               onChange={(e) => setFormData({...formData, price: e.target.value})}
-              placeholder="Price (e.g., ₹150)"
+              placeholder="Price (e.g., CA$150)"
             />
           </div>
           <div className="form-group">
@@ -1769,3 +2238,868 @@ function TiffinManagement({ items, setItems, showMessage, loading }) {
     </div>
   );
 }
+
+
+function PlannerManagement({ showMessage }) {
+  const buildChecklistString = checklist => ensureArray(checklist).join('\\n')
+
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [plannerEnabled, setPlannerEnabled] = useState(defaultPlannerConfig.plannerEnabled ?? true)
+  const [eventTypes, setEventTypes] = useState([])
+  const [serviceLevels, setServiceLevels] = useState([])
+  const [menuCollections, setMenuCollections] = useState([])
+  const [experienceAddons, setExperienceAddons] = useState([])
+  const [menuCategories, setMenuCategories] = useState([])
+  const [checklistText, setChecklistText] = useState(buildChecklistString(defaultPlannerConfig.onboardingChecklist))
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const sectionRefs = useRef({})
+  const [activeSectionId, setActiveSectionId] = useState('planner-section-celebrations')
+
+  const scrollToSection = useCallback(id => {
+    const node = sectionRefs.current?.[id]
+    if (node) {
+      node.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [])
+
+  const registerSectionRef = useCallback(id => node => {
+    if (!sectionRefs.current) {
+      sectionRefs.current = {}
+    }
+    if (node) {
+      sectionRefs.current[id] = node
+    } else {
+      delete sectionRefs.current[id]
+    }
+  }, [])
+
+
+  const hydrateFromConfig = useCallback(config => {
+    setEventTypes(
+      ensureArray(config.eventTypes).map(item => ({
+        id: item.id || '',
+        name: item.name || '',
+        description: item.description || '',
+        pricePerGuest: item.pricePerGuest ?? '',
+        highlight: item.highlight || '',
+      }))
+    )
+
+    setServiceLevels(
+      ensureArray(config.serviceLevels).map(item => ({
+        id: item.id || '',
+        name: item.name || '',
+        description: item.description || '',
+        pricePerGuest: item.pricePerGuest ?? '',
+      }))
+    )
+
+    setMenuCollections(
+      ensureArray(config.menuCollections).map(collection => ({
+        id: collection.id || '',
+        name: collection.name || '',
+        headline: collection.headline || '',
+        pricePerGuest: collection.pricePerGuest ?? '',
+        courses: convertCoursesToFields(collection.courses || {}),
+      }))
+    )
+
+    setExperienceAddons(
+      ensureArray(config.experienceAddons).map(item => ({
+        id: item.id || '',
+        name: item.name || '',
+        description: item.description || '',
+        type: item.type || 'per_person',
+        price: item.price ?? '',
+      }))
+    )
+
+    setMenuCategories(
+      ensureArray(config.menuBuilderCategories).map(category => ({
+        id: category.id || '',
+        label: category.label || '',
+        description: category.description || '',
+        maxSelections: category.maxSelections ?? '',
+        minSelections: category.minSelections ?? '',
+        itemsText: ensureArray(category.items)
+          .map(item => {
+            const parts = [item.id || '', item.name || '']
+            if (item.description) {
+              parts.push(item.description)
+            }
+            return parts.join('|')
+          })
+          .join('\\n'),
+      }))
+    )
+
+    setChecklistText(buildChecklistString(config.onboardingChecklist))
+  }, [])
+
+  const loadSettings = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError('')
+      setSuccess('')
+      const response = await fetch('/api/admin/planner', { cache: 'no-store' })
+      if (!response.ok) {
+        throw new Error('Failed to load planner settings')
+      }
+      const data = await response.json()
+      const config = normalisePlannerConfig(data?.plannerConfig || data?.config || {})
+      setPlannerEnabled(
+        typeof data?.plannerEnabled === 'boolean'
+          ? data.plannerEnabled
+          : config.plannerEnabled ?? defaultPlannerConfig.plannerEnabled ?? true
+      )
+      hydrateFromConfig(config)
+    } catch (err) {
+      console.error('Failed to load planner settings', err)
+      hydrateFromConfig(normalisePlannerConfig(defaultPlannerConfig))
+      setPlannerEnabled(defaultPlannerConfig.plannerEnabled ?? true)
+      setError('Failed to load planner settings. Showing defaults until you save.')
+    } finally {
+      setLoading(false)
+    }
+  }, [hydrateFromConfig])
+
+  useEffect(() => {
+    loadSettings()
+  }, [loadSettings])
+
+  const addEventType = useCallback(() => {
+    setEventTypes(prev => [...prev, { id: '', name: '', description: '', pricePerGuest: '', highlight: '' }])
+  }, [])
+
+  const updateEventType = (index, key, value) => {
+    setEventTypes(prev => prev.map((item, idx) => (idx === index ? { ...item, [key]: value } : item)))
+  }
+
+  const removeEventType = index => {
+    setEventTypes(prev => prev.filter((_, idx) => idx !== index))
+  }
+
+  const addServiceLevel = useCallback(() => {
+    setServiceLevels(prev => [...prev, { id: '', name: '', description: '', pricePerGuest: '' }])
+  }, [])
+
+  const updateServiceLevel = (index, key, value) => {
+    setServiceLevels(prev => prev.map((item, idx) => (idx === index ? { ...item, [key]: value } : item)))
+  }
+
+  const removeServiceLevel = index => {
+    setServiceLevels(prev => prev.filter((_, idx) => idx !== index))
+  }
+
+  const addMenuCollection = useCallback(() => {
+    setMenuCollections(prev => [...prev, { id: '', name: '', headline: '', pricePerGuest: '', courses: convertCoursesToFields({}) }])
+  }, [])
+
+  const updateCollectionField = (index, key, value) => {
+    setMenuCollections(prev => prev.map((collection, idx) => (idx === index ? { ...collection, [key]: value } : collection)))
+  }
+
+  const updateCollectionCourse = (collectionIndex, courseKey, value) => {
+    setMenuCollections(prev =>
+      prev.map((collection, idx) => {
+        if (idx !== collectionIndex) return collection
+        return {
+          ...collection,
+          courses: {
+            ...collection.courses,
+            [courseKey]: value,
+          },
+        }
+      })
+    )
+  }
+
+  const addCourseGroup = collectionIndex => {
+    const key = prompt('Enter a course key (e.g., starters, mains)')
+    if (!key) return
+    setMenuCollections(prev =>
+      prev.map((collection, idx) => {
+        if (idx !== collectionIndex) return collection
+        if (collection.courses[key]) return collection
+        return {
+          ...collection,
+          courses: {
+            ...collection.courses,
+            [key]: '',
+          },
+        }
+      })
+    )
+  }
+
+  const removeCourseGroup = (collectionIndex, courseKey) => {
+    setMenuCollections(prev =>
+      prev.map((collection, idx) => {
+        if (idx !== collectionIndex) return collection
+        const updatedCourses = { ...collection.courses }
+        delete updatedCourses[courseKey]
+        return {
+          ...collection,
+          courses: Object.keys(updatedCourses).length ? updatedCourses : convertCoursesToFields({}),
+        }
+      })
+    )
+  }
+
+  const removeMenuCollection = index => {
+    setMenuCollections(prev => prev.filter((_, idx) => idx !== index))
+  }
+
+  const addExperienceAddon = useCallback(() => {
+    setExperienceAddons(prev => [...prev, { id: '', name: '', description: '', type: 'per_person', price: '' }])
+  }, [])
+
+  const updateExperienceAddon = (index, key, value) => {
+    setExperienceAddons(prev => prev.map((item, idx) => (idx === index ? { ...item, [key]: value } : item)))
+  }
+
+  const removeExperienceAddon = index => {
+    setExperienceAddons(prev => prev.filter((_, idx) => idx !== index))
+  }
+
+  const addMenuCategory = useCallback(() => {
+    setMenuCategories(prev => [...prev, { id: '', label: '', description: '', maxSelections: '', minSelections: '', itemsText: '' }])
+  }, [])
+
+  const updateMenuCategory = (index, key, value) => {
+    setMenuCategories(prev => prev.map((item, idx) => (idx === index ? { ...item, [key]: value } : item)))
+  }
+
+  const removeMenuCategory = index => {
+    setMenuCategories(prev => prev.filter((_, idx) => idx !== index))
+  }
+
+  const handleReset = () => {
+    hydrateFromConfig(normalisePlannerConfig(defaultPlannerConfig))
+    setPlannerEnabled(defaultPlannerConfig.plannerEnabled ?? true)
+    setError('')
+    setSuccess('Defaults restored (remember to save).')
+  }
+
+  const handleSubmit = async event => {
+    event.preventDefault()
+    setError('')
+    setSuccess('')
+
+    const payloadConfig = {
+      eventTypes: eventTypes
+        .map((item, index) => ({
+          id: (item.id || slugify(item.name, `event-${index + 1}`)).trim(),
+          name: item.name.trim(),
+          description: item.description.trim(),
+          pricePerGuest: toNumber(item.pricePerGuest),
+          highlight: item.highlight.trim(),
+        }))
+        .filter(item => item.name),
+      serviceLevels: serviceLevels
+        .map((item, index) => ({
+          id: (item.id || slugify(item.name, `service-${index + 1}`)).trim(),
+          name: item.name.trim(),
+          description: item.description.trim(),
+          pricePerGuest: toNumber(item.pricePerGuest),
+        }))
+        .filter(item => item.name),
+      menuCollections: menuCollections
+        .map((collection, index) => ({
+          id: (collection.id || slugify(collection.name, `collection-${index + 1}`)).trim(),
+          name: collection.name.trim(),
+          headline: collection.headline.trim(),
+          pricePerGuest: toNumber(collection.pricePerGuest),
+          courses: convertFieldsToCourses(collection.courses),
+        }))
+        .filter(collection => collection.name),
+      experienceAddons: experienceAddons
+        .map((addon, index) => ({
+          id: (addon.id || slugify(addon.name, `addon-${index + 1}`)).trim(),
+          name: addon.name.trim(),
+          description: addon.description.trim(),
+          type: addon.type === 'flat' ? 'flat' : 'per_person',
+          price: toNumber(addon.price),
+        }))
+        .filter(addon => addon.name),
+      menuBuilderCategories: menuCategories
+        .map((category, index) => {
+          const items = category.itemsText
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(Boolean)
+            .map((line, itemIndex) => {
+              const [rawId = '', rawName = '', rawDescription = ''] = line.split('|').map(part => part.trim())
+              const name = rawName || rawId || `Item ${itemIndex + 1}`
+              return {
+                id: (rawId || slugify(name, `item-${itemIndex + 1}`)).trim(),
+                name,
+                ...(rawDescription ? { description: rawDescription } : {}),
+              }
+            })
+          return {
+            id: (category.id || slugify(category.label, `category-${index + 1}`)).trim(),
+            label: category.label.trim() || `Category ${index + 1}`,
+            description: category.description.trim(),
+            ...(toOptionalNumber(category.maxSelections) !== undefined
+              ? { maxSelections: toOptionalNumber(category.maxSelections) }
+              : {}),
+            ...(toOptionalNumber(category.minSelections) !== undefined
+              ? { minSelections: toOptionalNumber(category.minSelections) }
+              : {}),
+            items,
+          }
+        })
+        .filter(category => category.items.length),
+      onboardingChecklist: checklistText
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean),
+    }
+
+    try {
+      setSaving(true)
+      const response = await fetch('/api/admin/planner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plannerEnabled, plannerConfig: payloadConfig }),
+      })
+      const data = await response.json()
+      if (!response.ok || data?.success === false) {
+        throw new Error(data?.error || 'Unable to save planner settings')
+      }
+      await loadSettings()
+      const successMessage = 'Planner settings saved and synced to the live planner.'
+      setSuccess(successMessage)
+      showMessage && showMessage(successMessage)
+    } catch (err) {
+      console.error('Failed to save planner settings', err)
+      const message = err.message || 'Failed to save planner settings.'
+      setError(message)
+      showMessage && showMessage(message, 'error')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const onboardingItemsCount = useMemo(() => {
+    return checklistText
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(Boolean).length
+  }, [checklistText])
+
+  const plannerSummaryCards = useMemo(
+    () => [
+      { label: 'Event styles', value: eventTypes.length, helper: 'Client entry points' },
+      { label: 'Service tiers', value: serviceLevels.length, helper: 'Staffing experiences' },
+      { label: 'Menu collections', value: menuCollections.length, helper: 'Curated menu stories' },
+      { label: 'Experience add-ons', value: experienceAddons.length, helper: 'Upsell opportunities' },
+      { label: 'Menu categories', value: menuCategories.length, helper: 'Dish pickers' },
+    ],
+    [eventTypes.length, serviceLevels.length, menuCollections.length, experienceAddons.length, menuCategories.length]
+  )
+
+  const plannerSectionsMeta = useMemo(
+    () => [
+      {
+        id: 'planner-section-celebrations',
+        label: 'Celebration styles',
+        subtitle: 'Event presets and pricing',
+        count: eventTypes.length,
+      },
+      {
+        id: 'planner-section-service-levels',
+        label: 'Service levels',
+        subtitle: 'Hospitality tiers',
+        count: serviceLevels.length,
+      },
+      {
+        id: 'planner-section-menu-collections',
+        label: 'Menu collections',
+        subtitle: 'Signature menus',
+        count: menuCollections.length,
+      },
+      {
+        id: 'planner-section-addons',
+        label: 'Experience add-ons',
+        subtitle: 'Upgrades & counters',
+        count: experienceAddons.length,
+      },
+      {
+        id: 'planner-section-menu-builder',
+        label: 'Menu builder',
+        subtitle: 'Dish-level options',
+        count: menuCategories.length,
+      },
+      {
+        id: 'planner-section-onboarding',
+        label: 'Onboarding checklist',
+        subtitle: 'After-enquiry steps',
+        count: onboardingItemsCount,
+      },
+    ],
+    [
+      eventTypes.length,
+      serviceLevels.length,
+      menuCollections.length,
+      experienceAddons.length,
+      menuCategories.length,
+      onboardingItemsCount,
+    ]
+  )
+
+  const plannerQuickActions = useMemo(
+    () => [
+      {
+        label: 'Add event style',
+        onClick: () => {
+          addEventType()
+          setTimeout(() => scrollToSection('planner-section-celebrations'), 120)
+        },
+      },
+      {
+        label: 'Add service level',
+        onClick: () => {
+          addServiceLevel()
+          setTimeout(() => scrollToSection('planner-section-service-levels'), 120)
+        },
+      },
+      {
+        label: 'Add menu collection',
+        onClick: () => {
+          addMenuCollection()
+          setTimeout(() => scrollToSection('planner-section-menu-collections'), 120)
+        },
+      },
+      {
+        label: 'Add experience add-on',
+        onClick: () => {
+          addExperienceAddon()
+          setTimeout(() => scrollToSection('planner-section-addons'), 120)
+        },
+      },
+      {
+        label: 'Add menu category',
+        onClick: () => {
+          addMenuCategory()
+          setTimeout(() => scrollToSection('planner-section-menu-builder'), 120)
+        },
+      },
+    ],
+    [addEventType, addServiceLevel, addMenuCollection, addExperienceAddon, addMenuCategory, scrollToSection]
+  )
+
+  useEffect(() => {
+    if (!plannerSectionsMeta.length) {
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      entries => {
+        const visible = entries
+          .filter(entry => entry.isIntersecting)
+          .sort((a, b) => Number(a.target.dataset.navIndex || 0) - Number(b.target.dataset.navIndex || 0))
+
+        const nextId = visible[0]?.target?.id
+        if (nextId) {
+          setActiveSectionId(prev => (prev === nextId ? prev : nextId))
+        }
+      },
+      { rootMargin: '-40% 0px -45% 0px', threshold: [0.2, 0.4, 0.6] }
+    )
+
+    const nodes = plannerSectionsMeta
+      .map((section, index) => {
+        const node = sectionRefs.current?.[section.id]
+        if (node) {
+          node.dataset.navIndex = String(index)
+          observer.observe(node)
+        }
+        return node
+      })
+      .filter(Boolean)
+
+    return () => {
+      nodes.forEach(node => observer.unobserve(node))
+      observer.disconnect()
+    }
+  }, [plannerSectionsMeta])
+
+  useEffect(() => {
+    if (!plannerSectionsMeta.length) {
+      return
+    }
+    const hasActive = plannerSectionsMeta.some(section => section.id === activeSectionId)
+    if (!hasActive) {
+      setActiveSectionId(plannerSectionsMeta[0].id)
+    }
+  }, [plannerSectionsMeta, activeSectionId])
+
+  return (
+    <div className="planner-wrapper">
+      <form onSubmit={handleSubmit} className="planner-shell">
+        <div className="planner-headline-card">
+          <div className="planner-headline">
+            <div className="planner-headline__copy">
+              <p className="planner-headline__eyebrow">Planner Studio</p>
+              <h2 className="planner-headline__title">Design the live planning experience</h2>
+              <p className="planner-headline__subtitle">
+                Tune pricing, collections, and onboarding that power the public planner flow.
+              </p>
+            </div>
+            <div className="planner-toggle">
+              <label className="toggle-label">
+                <input
+                  type="checkbox"
+                  checked={plannerEnabled}
+                  onChange={event => setPlannerEnabled(event.target.checked)}
+                />
+                <span>Display planner on the public site</span>
+              </label>
+              <p className="help-text">Toggle this off to route visitors to the contact form instead of the live planner.</p>
+            </div>
+          </div>
+          <div className="planner-summary-grid">
+            {plannerSummaryCards.map(card => (
+              <div key={card.label} className="planner-stat">
+                <span className="planner-stat__value">{card.value}</span>
+                <span className="planner-stat__label">{card.label}</span>
+                <span className="planner-stat__hint">{card.helper}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="planner-admin-layout">
+          <aside className="planner-nav">
+            <p className="planner-nav__title">Jump to section</p>
+            <div className="planner-nav__list">
+              {plannerSectionsMeta.map((section, index) => (
+                <button
+                  key={section.id}
+                  type="button"
+                  className={`planner-nav__item${activeSectionId === section.id ? ' active' : ''}`}
+                  onClick={() => scrollToSection(section.id)}
+                >
+                  <span className="planner-nav__index">{index + 1}</span>
+                  <span className="planner-nav__label">
+                    <span className="planner-nav__label-title">{section.label}</span>
+                    <span className="planner-nav__label-sub">{section.subtitle}</span>
+                  </span>
+                  <span className="planner-nav__count">{section.count}</span>
+                </button>
+              ))}
+            </div>
+            <div className="planner-nav__actions">
+              <p className="planner-nav__actions-title">Quick actions</p>
+              <div className="planner-quick-grid">
+                {plannerQuickActions.map(action => (
+                  <button key={action.label} type="button" className="planner-quick-button" onClick={action.onClick}>
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </aside>
+          <div className="planner-content">
+            {error && <div className="message error">{error}</div>}
+            {success && <div className="message success">{success}</div>}
+            {loading && <div className="message info">Refreshing planner settings...</div>}
+
+            <section
+              id="planner-section-celebrations"
+              ref={registerSectionRef('planner-section-celebrations')}
+              className="planner-section"
+            >
+              <header className="planner-section__header">
+                <div className="planner-section__title">
+                  <h3>Event celebration styles</h3>
+                  <span className="planner-count-badge">{eventTypes.length}</span>
+                </div>
+                <button type="button" className="btn btn-secondary" onClick={addEventType}>
+                  Add event style
+                </button>
+              </header>
+              <p className="planner-section__description">These options appear as the first step in the planner. Include pricing per guest and the headline highlight.</p>
+              {eventTypes.length === 0 && <p className="empty-note">No event styles yet. Add one to get started.</p>}
+              {eventTypes.map((item, index) => (
+                <div key={item.id || index} className="planner-card">
+                  <div className="card-header">
+                    <h4>Event {index + 1}</h4>
+                    <button type="button" className="btn btn-danger btn-small" onClick={() => removeEventType(index)}>
+                      Remove
+                    </button>
+                  </div>
+                  <div className="field-grid">
+                    <label className="field">
+                      <span>Name</span>
+                      <input value={item.name} onChange={event => updateEventType(index, 'name', event.target.value)} required />
+                    </label>
+                    <label className="field">
+                      <span>Price per guest (CA$)</span>
+                      <input type="number" min="0" value={item.pricePerGuest} onChange={event => updateEventType(index, 'pricePerGuest', event.target.value)} />
+                    </label>
+                  </div>
+                  <label className="field">
+                    <span>Highlight</span>
+                    <input
+                      value={item.highlight}
+                      onChange={event => updateEventType(index, 'highlight', event.target.value)}
+                      placeholder="Royal hospitality for multi-day festivities"
+                    />
+                  </label>
+                  <label className="field">
+                    <span>Description</span>
+                    <textarea rows={3} value={item.description} onChange={event => updateEventType(index, 'description', event.target.value)} />
+                  </label>
+                </div>
+              ))}
+            </section>
+
+            <section
+              id="planner-section-service-levels"
+              ref={registerSectionRef('planner-section-service-levels')}
+              className="planner-section"
+            >
+              <header className="planner-section__header">
+                <div className="planner-section__title">
+                  <h3>Service levels</h3>
+                  <span className="planner-count-badge">{serviceLevels.length}</span>
+                </div>
+                <button type="button" className="btn btn-secondary" onClick={addServiceLevel}>
+                  Add service level
+                </button>
+              </header>
+              <p className="planner-section__description">Control staffing style and per-guest pricing tiers.</p>
+              {serviceLevels.length === 0 && <p className="empty-note">No service levels configured.</p>}
+              {serviceLevels.map((item, index) => (
+                <div key={item.id || index} className="planner-card">
+                  <div className="card-header">
+                    <h4>Service level {index + 1}</h4>
+                    <button type="button" className="btn btn-danger btn-small" onClick={() => removeServiceLevel(index)}>
+                      Remove
+                    </button>
+                  </div>
+                  <div className="field-grid">
+                    <label className="field">
+                      <span>Name</span>
+                      <input value={item.name} onChange={event => updateServiceLevel(index, 'name', event.target.value)} required />
+                    </label>
+                    <label className="field">
+                      <span>Price per guest (CA$)</span>
+                      <input type="number" min="0" value={item.pricePerGuest} onChange={event => updateServiceLevel(index, 'pricePerGuest', event.target.value)} />
+                    </label>
+                  </div>
+                  <label className="field">
+                    <span>Description</span>
+                    <textarea rows={3} value={item.description} onChange={event => updateServiceLevel(index, 'description', event.target.value)} />
+                  </label>
+                </div>
+              ))}
+            </section>
+
+            <section
+              id="planner-section-menu-collections"
+              ref={registerSectionRef('planner-section-menu-collections')}
+              className="planner-section"
+            >
+              <header className="planner-section__header">
+                <div className="planner-section__title">
+                  <h3>Menu collections</h3>
+                  <span className="planner-count-badge">{menuCollections.length}</span>
+                </div>
+                <button type="button" className="btn btn-secondary" onClick={addMenuCollection}>
+                  Add menu collection
+                </button>
+              </header>
+              <p className="planner-section__description">These are the curated menu stories guests can choose from. Use course groups to control which dishes show in each section.</p>
+              {menuCollections.length === 0 && <p className="empty-note">No menu collections configured.</p>}
+              {menuCollections.map((collection, index) => (
+                <div key={collection.id || index} className="planner-card">
+                  <div className="card-header">
+                    <h4>Collection {index + 1}</h4>
+                    <div className="card-actions">
+                      <button type="button" className="btn btn-secondary btn-small" onClick={() => addCourseGroup(index)}>
+                        Add course group
+                      </button>
+                      <button type="button" className="btn btn-danger btn-small" onClick={() => removeMenuCollection(index)}>
+                        Remove collection
+                      </button>
+                    </div>
+                  </div>
+                  <div className="field-grid">
+                    <label className="field">
+                      <span>Name</span>
+                      <input value={collection.name} onChange={event => updateCollectionField(index, 'name', event.target.value)} required />
+                    </label>
+                    <label className="field">
+                      <span>Price per guest (CA$)</span>
+                      <input type="number" min="0" value={collection.pricePerGuest} onChange={event => updateCollectionField(index, 'pricePerGuest', event.target.value)} />
+                    </label>
+                  </div>
+                  <label className="field">
+                    <span>Headline</span>
+                    <input value={collection.headline} onChange={event => updateCollectionField(index, 'headline', event.target.value)} />
+                  </label>
+                  <div className="course-group-grid">
+                    {Object.entries(collection.courses).map(([courseKey, value]) => (
+                      <div key={courseKey} className="field">
+                        <div className="course-label">
+                          <span>{courseKey}</span>
+                          <button type="button" className="btn-link" onClick={() => removeCourseGroup(index, courseKey)}>
+                            Remove
+                          </button>
+                        </div>
+                        <textarea
+                          rows={4}
+                          value={value}
+                          placeholder="One dish per line"
+                          onChange={event => updateCollectionCourse(index, courseKey, event.target.value)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </section>
+
+            <section
+              id="planner-section-addons"
+              ref={registerSectionRef('planner-section-addons')}
+              className="planner-section"
+            >
+              <header className="planner-section__header">
+                <div className="planner-section__title">
+                  <h3>Experience add-ons</h3>
+                  <span className="planner-count-badge">{experienceAddons.length}</span>
+                </div>
+                <button type="button" className="btn btn-secondary" onClick={addExperienceAddon}>
+                  Add add-on
+                </button>
+              </header>
+              <p className="planner-section__description">Enhancements that guests can bundle with their celebration. Prices can be per guest or flat.</p>
+              {experienceAddons.length === 0 && <p className="empty-note">No experiential add-ons configured.</p>}
+              {experienceAddons.map((addon, index) => (
+                <div key={addon.id || index} className="planner-card">
+                  <div className="card-header">
+                    <h4>Add-on {index + 1}</h4>
+                    <button type="button" className="btn btn-danger btn-small" onClick={() => removeExperienceAddon(index)}>
+                      Remove
+                    </button>
+                  </div>
+                  <div className="field-grid">
+                    <label className="field">
+                      <span>Name</span>
+                      <input value={addon.name} onChange={event => updateExperienceAddon(index, 'name', event.target.value)} required />
+                    </label>
+                    <label className="field">
+                      <span>Price (CA$)</span>
+                      <input type="number" min="0" value={addon.price} onChange={event => updateExperienceAddon(index, 'price', event.target.value)} />
+                    </label>
+                    <label className="field">
+                      <span>Pricing type</span>
+                      <select value={addon.type} onChange={event => updateExperienceAddon(index, 'type', event.target.value)}>
+                        <option value="per_person">Per guest</option>
+                        <option value="flat">Flat</option>
+                      </select>
+                    </label>
+                  </div>
+                  <label className="field">
+                    <span>Description</span>
+                    <textarea rows={3} value={addon.description} onChange={event => updateExperienceAddon(index, 'description', event.target.value)} />
+                  </label>
+                </div>
+              ))}
+            </section>
+
+            <section
+              id="planner-section-menu-builder"
+              ref={registerSectionRef('planner-section-menu-builder')}
+              className="planner-section"
+            >
+              <header className="planner-section__header">
+                <div className="planner-section__title">
+                  <h3>Menu builder categories</h3>
+                  <span className="planner-count-badge">{menuCategories.length}</span>
+                </div>
+                <button type="button" className="btn btn-secondary" onClick={addMenuCategory}>
+                  Add category
+                </button>
+              </header>
+              <p className="planner-section__description">These control the dish selection checklists (e.g., sabjis, breads). Each line below follows the format <strong>id|name|description</strong>.</p>
+              {menuCategories.length === 0 && <p className="empty-note">No categories configured.</p>}
+              {menuCategories.map((category, index) => (
+                <div key={category.id || index} className="planner-card">
+                  <div className="card-header">
+                    <h4>Category {index + 1}</h4>
+                    <button type="button" className="btn btn-danger btn-small" onClick={() => removeMenuCategory(index)}>
+                      Remove
+                    </button>
+                  </div>
+                  <div className="field-grid">
+                    <label className="field">
+                      <span>Label</span>
+                      <input value={category.label} onChange={event => updateMenuCategory(index, 'label', event.target.value)} required />
+                    </label>
+                    <label className="field">
+                      <span>Max selections</span>
+                      <input type="number" min="0" value={category.maxSelections} onChange={event => updateMenuCategory(index, 'maxSelections', event.target.value)} />
+                    </label>
+                    <label className="field">
+                      <span>Min selections</span>
+                      <input type="number" min="0" value={category.minSelections} onChange={event => updateMenuCategory(index, 'minSelections', event.target.value)} />
+                    </label>
+                  </div>
+                  <label className="field">
+                    <span>Description</span>
+                    <textarea rows={2} value={category.description} onChange={event => updateMenuCategory(index, 'description', event.target.value)} />
+                  </label>
+                  <label className="field">
+                    <span>Options (one per line)</span>
+                    <textarea
+                      rows={4}
+                      value={category.itemsText}
+                      placeholder="id|name|description"
+                      onChange={event => updateMenuCategory(index, 'itemsText', event.target.value)}
+                    />
+                  </label>
+                </div>
+              ))}
+            </section>
+
+            <section
+              id="planner-section-onboarding"
+              ref={registerSectionRef('planner-section-onboarding')}
+              className="planner-section"
+            >
+              <header className="planner-section__header">
+                <div className="planner-section__title">
+                  <h3>Onboarding checklist</h3>
+                  <span className="planner-count-badge">{onboardingItemsCount}</span>
+                </div>
+              </header>
+              <p className="planner-section__description">Shown after submission to reassure clients what happens next.</p>
+              <label className="field">
+                <span>Checklist items</span>
+                <textarea rows={4} value={checklistText} onChange={event => setChecklistText(event.target.value)} />
+              </label>
+            </section>
+          </div>
+        </div>
+
+        <div className="planner-actions">
+          <button type="submit" className="btn btn-primary" disabled={saving}>
+            {saving ? 'Saving...' : 'Save planner settings'}
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={handleReset} disabled={saving}>
+            Reset to defaults
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
+

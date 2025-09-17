@@ -18,7 +18,7 @@ export default function Header() {
     { name: 'Gallery',      href: '/gallery' },
     { name: 'Contact',      href: '/contact' },
     { name: 'Testimonials', href: '/testimonials' },
-    { name: '🎭 Order here', href: '/garba-booking', special: true },
+    // { name: '🎭 Order here', href: '/garba-booking', special: true },
   ];
 
   return (

@@ -1,12 +1,15 @@
 'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
+import { usePlannerAvailability } from '@/hooks/usePlannerAvailability'
 import { motion } from 'framer-motion'
 
 export default function Hero() {
+  const { enabled: plannerEnabled } = usePlannerAvailability()
+
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
-      {/* Background image */}
+    <section className="relative flex h-screen items-center justify-center overflow-hidden">
       <Image
         src="/images/hero-bg.jpeg"
         alt="Fresh ingredients background"
@@ -15,18 +18,15 @@ export default function Hero() {
         priority
       />
 
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/20 to-transparent" />
 
-      {/* Animated content */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10 text-center px-4"
+        className="relative z-10 px-4 text-center"
       >
-        {/* Huge logo at 200×200px */}
-        <div className="mx-auto mb-6 w-[300px] h-[300px] relative">
+        <div className="relative mx-auto mb-6 h-[300px] w-[300px]">
           <Image
             src="/images/logo.png"
             alt="Atmiya Catering Logo"
@@ -35,26 +35,25 @@ export default function Hero() {
           />
         </div>
 
-        <h1 className="text-4xl sm:text-5xl md:text-7xl font-serif font-bold text-white mb-6 drop-shadow-lg">
+        <h1 className="mb-6 text-4xl font-serif font-bold text-white drop-shadow-lg sm:text-5xl md:text-7xl">
           Atmiya <span className="text-accent">Caterers</span>
           <br />Taste the Tradition, Feel the Devotion
         </h1>
-        <p className="text-base sm:text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
-          From intimate gatherings to grand celebrations, we craft unforgettable culinary experiences that delight your guests and exceed expectations.
+        <p className="mx-auto mb-8 max-w-2xl text-base text-gray-200 sm:text-lg md:text-xl">
+          From intimate gatherings to grand celebrations, we craft unforgettable culinary moments that delight your guests and honour Gujarati hospitality.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/menu" className="btn-secondary text-lg px-10 py-4">
+        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <Link href="/menu" className="btn-secondary px-10 py-4 text-lg">
             View Menu
           </Link>
-          <Link href="/contact" className="btn-primary text-lg px-10 py-4">
-            Get Free Quote
+          <Link href={plannerEnabled ? '/planner' : '/contact'} className="btn-primary px-10 py-4 text-lg">
+            {plannerEnabled ? 'Plan Your Menu' : 'Get Free Quote'}
           </Link>
         </div>
       </motion.div>
 
-      {/* SVG wave divider */}
       <div className="absolute bottom-0 w-full overflow-hidden leading-none">
-        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-20 fill-white">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="h-20 w-full fill-white">
           <path d="M0,0 C600,100 600,100 1200,0 L1200,120 L0,120 Z" />
         </svg>
       </div>
