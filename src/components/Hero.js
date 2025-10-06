@@ -43,7 +43,7 @@ export default function Hero() {
           From intimate gatherings to grand celebrations, we craft unforgettable culinary moments that delight your guests and honour Gujarati hospitality.
         </p>
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Link href="/menu" className="btn-secondary px-10 py-4 text-lg">
+          <Link href="/food-catalogue" className="btn-secondary px-10 py-4 text-lg">
             View Menu
           </Link>
           <Link href={plannerEnabled ? '/planner' : '/contact'} className="btn-primary px-10 py-4 text-lg">
