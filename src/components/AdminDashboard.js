@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { defaultPlannerConfig, normalisePlannerConfig } from '@/data/plannerOptions';
 import BookingsManagement from './BookingsManagement';
+import CatalogueManagement from './catalogue/CatalogueManagement';
 const ensureArray = value => (Array.isArray(value) ? value : [])
 
 const slugify = (input, fallback) => {
@@ -71,6 +72,8 @@ export default function AdminDashboard() {
   const [events, setEvents] = useState([]);
   const [tiffinPlans, setTiffinPlans] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [catalogueCategories, setCatalogueCategories] = useState([]);
+  const [catalogueItems, setCatalogueItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -140,6 +143,57 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchCatalogueData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [categoriesResponse, itemsResponse] = await Promise.all([
+        fetch('/api/admin/catalogue/categories'),
+        fetch('/api/admin/catalogue/items')
+      ]);
+
+      const categoriesText = await categoriesResponse.text();
+      const itemsText = await itemsResponse.text();
+
+      let categoriesData = [];
+      let itemsData = [];
+
+      if (categoriesResponse.ok && categoriesText) {
+        try {
+          const parsed = JSON.parse(categoriesText);
+          categoriesData = Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+          console.error('JSON parse error for catalogue categories:', error);
+        }
+      }
+
+      if (itemsResponse.ok && itemsText) {
+        try {
+          const parsed = JSON.parse(itemsText);
+          itemsData = Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+          console.error('JSON parse error for catalogue items:', error);
+        }
+      }
+
+      if (!categoriesResponse.ok) {
+        console.error('Failed to fetch catalogue categories', categoriesResponse.status);
+      }
+
+      if (!itemsResponse.ok) {
+        console.error('Failed to fetch catalogue items', itemsResponse.status);
+      }
+
+      setCatalogueCategories(categoriesData);
+      setCatalogueItems(itemsData);
+    } catch (error) {
+      console.error('Error fetching catalogue data:', error);
+      setCatalogueCategories([]);
+      setCatalogueItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const showMessage = (msg, type = 'success') => {
     setMessage({ text: msg, type });
     setTimeout(() => setMessage(''), 3000);
@@ -155,6 +209,7 @@ export default function AdminDashboard() {
     if (activeSection === 'gallery') fetchData('gallery', setGalleryItems);
     if (activeSection === 'testimonials') fetchData('testimonials', setTestimonials);
     if (activeSection === 'events') fetchData('events', setEvents);
+    if (activeSection === 'catalogue') fetchCatalogueData();
     if (activeSection === 'tiffin') fetchData('tiffin', setTiffinPlans);
     if (activeSection === 'bookings') {
       fetch('/api/bookings')
@@ -185,7 +240,7 @@ export default function AdminDashboard() {
           setBookings([]);
         });
     }
-  }, [activeSection]);
+  }, [activeSection, fetchCatalogueData]);
 
   return (
     <div className="admin-container">
@@ -331,6 +386,24 @@ export default function AdminDashboard() {
             <MenuManagement 
               items={menuItems} 
               setItems={setMenuItems}
+              showMessage={showMessage}
+              loading={loading}
+            />
+          </section>
+        )}
+
+        {activeSection === 'catalogue' && (
+          <section id="catalogue" className="content-section active">
+            <h2 className="section-title">
+              <i className="fas fa-book-open"></i>
+              Food Catalogue Management
+            </h2>
+            <CatalogueManagement
+              categories={catalogueCategories}
+              setCategories={setCatalogueCategories}
+              items={catalogueItems}
+              setItems={setCatalogueItems}
+              refreshCatalogue={fetchCatalogueData}
               showMessage={showMessage}
               loading={loading}
             />
@@ -3102,4 +3175,15 @@ function PlannerManagement({ showMessage }) {
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+
+
 

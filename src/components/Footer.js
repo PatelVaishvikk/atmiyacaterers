@@ -34,7 +34,7 @@ export default function Footer() {
               <li><Link href="/" className="text-gray-300 hover:text-white transition-colors">Home</Link></li>
               <li><Link href="/about" className="text-gray-300 hover:text-white transition-colors">About Us</Link></li>
               <li><Link href="/services" className="text-gray-300 hover:text-white transition-colors">Services</Link></li>
-              <li><Link href="/menu" className="text-gray-300 hover:text-white transition-colors">Menu</Link></li>
+              <li><Link href="/food-catalogue" className="text-gray-300 hover:text-white transition-colors">Food Catalogue</Link></li>
               <li><Link href="/gallery" className="text-gray-300 hover:text-white transition-colors">Gallery</Link></li>
               <li><Link href="/testimonials" className="text-gray-300 hover:text-white transition-colors">Testimonials</Link></li> {/* ← added */}
             </ul>
@@ -86,3 +86,4 @@ export default function Footer() {
     </footer>
   )
 }
+
