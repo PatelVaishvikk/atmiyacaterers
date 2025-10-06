@@ -161,50 +161,21 @@ export default function FoodCatalogueClient({ categories = [], items = [] }) {
 
   const tierFilterMeta = filterMeta[activeTierFilter] || filterMeta.all;
 
-  const stats = useMemo(() => {
-    const totalTopCategories = topLevelCategories.length;
-    const totalItems = items.length;
-    const premiumCount = items.filter(item => normaliseTier(item.tier) === 'premium').length;
-    const signatureCount = items.filter(item => normaliseTier(item.tier) === 'signature').length;
-
-    return [
-      {
-        label: 'Top-level categories',
-        value: totalTopCategories,
-        accent: 'text-orange-500',
-      },
-      {
-        label: 'Total dishes loaded',
-        value: totalItems,
-        accent: 'text-emerald-500',
-      },
-      {
-        label: 'Premium highlights',
-        value: premiumCount,
-        accent: 'text-amber-500',
-      },
-      {
-        label: 'Signature specials',
-        value: signatureCount,
-        accent: 'text-purple-500',
-      },
-    ];
-  }, [items, topLevelCategories]);
 
   return (
     <div className="space-y-12">
-      <section className="rounded-3xl bg-gradient-to-r from-orange-100 via-amber-100 to-yellow-100 px-6 py-12 shadow-lg">
-        <div className="mx-auto max-w-4xl text-center space-y-5">
+      <section className="rounded-3xl bg-gradient-to-r from-orange-100 via-amber-100 to-yellow-100 px-6 py-8 sm:py-10 shadow-lg">
+        <div className="mx-auto max-w-4xl text-center space-y-4">
           <p className="text-sm uppercase tracking-[0.3em] text-orange-500">Food Catalogue</p>
-          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">Crafted Menus for Every Occasion</h1>
-          <p className="text-lg text-gray-700">
+          <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl md:text-5xl">Crafted Menus for Every Occasion</h1>
+          <p className="text-base text-gray-700 sm:text-lg">
             Explore curated dishes across every course. Use the quick filters to compare Standard and Premium tiers or dive into regional main-course collections.
           </p>
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <Link
               href={CATALOGUE_DOWNLOAD_PATH}
               prefetch={false}
-              className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-orange-600"
+              className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-orange-600"
             >
               <span className="fas fa-file-download" aria-hidden="true"></span>
               <span>Download PDF Catalogue</span>
@@ -212,15 +183,6 @@ export default function FoodCatalogueClient({ categories = [], items = [] }) {
             {/* <span className="text-xs text-gray-500">(Add your latest catalogue PDF at public/food-catalogue.pdf)</span> */}
           </div>
         </div>
-      </section>
-
-      <section className="grid gap-4 rounded-3xl border border-orange-100 bg-white/70 px-6 py-6 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map(stat => (
-          <div key={stat.label} className="flex flex-col rounded-2xl bg-white/80 p-4 shadow-sm">
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">{stat.label}</span>
-            <span className={`mt-2 text-2xl font-bold ${stat.accent}`}>{stat.value}</span>
-          </div>
-        ))}
       </section>
 
       {hasCategories ? (
