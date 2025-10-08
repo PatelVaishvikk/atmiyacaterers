@@ -3,6 +3,7 @@ import { buildDefaultCatalogueSnapshot } from '@/data/catalogueDefaults';
 
 const CATEGORY_COLLECTION = 'catalogueCategories';
 const ITEM_COLLECTION = 'catalogueItems';
+const SETTINGS_COLLECTION = 'settings';
 
 const toPlainCategory = category => {
   if (!category) return category;
@@ -31,7 +32,7 @@ export async function getCatalogueData(options = {}) {
     const categoryQuery = includeInactive ? {} : { isActive: { $ne: false } };
     const itemQuery = includeInactive ? {} : { isActive: { $ne: false } };
 
-    const [categories, items] = await Promise.all([
+    const [categories, items, settingsDoc] = await Promise.all([
       db
         .collection(CATEGORY_COLLECTION)
         .find(categoryQuery)
@@ -42,16 +43,27 @@ export async function getCatalogueData(options = {}) {
         .find(itemQuery)
         .sort({ sortOrder: 1, name: 1 })
         .toArray(),
+      db
+        .collection(SETTINGS_COLLECTION)
+        .findOne({}, { projection: { catalogueEnquiry: 1 } }),
     ]);
 
     const snapshot = buildDefaultCatalogueSnapshot();
     const finalCategories = categories.length ? categories.map(toPlainCategory) : snapshot.categories;
     const finalItems = items.length ? items.map(toPlainItem) : snapshot.items;
+    const catalogueEnquiry = settingsDoc?.catalogueEnquiry || {};
+    const settings = {
+      catalogueEnquiry: {
+        enabled: Boolean(catalogueEnquiry.enabled),
+        whatsappNumber: catalogueEnquiry.whatsappNumber || '',
+      },
+    };
 
-    return { categories: finalCategories, items: finalItems };
+    return { categories: finalCategories, items: finalItems, settings };
   } catch (error) {
     console.error('Falling back to default catalogue snapshot', error);
-    return buildDefaultCatalogueSnapshot();
+    const snapshot = buildDefaultCatalogueSnapshot();
+    return { ...snapshot, settings: { catalogueEnquiry: { enabled: false, whatsappNumber: '' } } };
   }
 }
 

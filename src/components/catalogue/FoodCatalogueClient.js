@@ -1,84 +1,38 @@
-'use client';
+export default function FoodCatalogueClient({ categories = [], items = [], settings = {} }) {
+  const catalogueEnquiry = settings?.catalogueEnquiry || {};
+  const enquiryEnabled = Boolean(catalogueEnquiry.enabled);
+  const whatsappNumber = (catalogueEnquiry.whatsappNumber || '').trim();
+  const whatsappReady = enquiryEnabled && Boolean(sanitisePhoneNumber(whatsappNumber));
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import Link from 'next/link';
-
-const tierMeta = {
-  standard: {
-    label: 'Standard',
-    description: 'Comfort classics perfect for every guest list.',
-    cardClass: 'from-emerald-50 via-white to-emerald-100/50 border-emerald-200 shadow-emerald-100/70',
-    badgeClass: 'bg-emerald-500/10 text-emerald-600',
-    dotClass: 'bg-emerald-500',
-  },
-  premium: {
-    label: 'Premium',
-    description: 'Upscale favourites that elevate the dining experience.',
-    cardClass: 'from-amber-50 via-white to-amber-100/50 border-amber-200 shadow-amber-100/70',
-    badgeClass: 'bg-amber-500/10 text-amber-600',
-    dotClass: 'bg-amber-500',
-  },
-  signature: {
-    label: 'Signature',
-    description: 'Chef-curated showstoppers reserved for special menus.',
-    cardClass: 'from-purple-50 via-white to-purple-100/50 border-purple-200 shadow-purple-100/70',
-    badgeClass: 'bg-purple-500/10 text-purple-600',
-    dotClass: 'bg-purple-500',
-  },
-};
-
-const filterMeta = {
-  all: {
-    label: 'All tiers',
-    description: 'Showing every tier available for this selection.',
-    badgeClass: 'bg-slate-500/10 text-slate-600',
-  },
-  ...Object.entries(tierMeta).reduce((acc, [key, meta]) => {
-    acc[key] = {
-      label: meta.label,
-      description: meta.description,
-      badgeClass: meta.badgeClass,
-    };
-    return acc;
-  }, {}),
-};
-
-const tierOrder = ['standard', 'premium', 'signature'];
-
-const normaliseTier = value => {
-  if (!value) return 'standard';
-  const key = String(value).toLowerCase();
-  return tierMeta[key] ? key : 'standard';
-};
-
-const getAccentColor = color => {
-  if (typeof color !== 'string') return '#f97316';
-  const trimmed = color.trim();
-  return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(trimmed) ? trimmed : '#f97316';
-};
-
-const sortByName = (a, b) => (a?.name || '').localeCompare(b?.name || '');
-
-const tierFilters = [
-  { key: 'all', label: 'All tiers' },
-  { key: 'standard', label: 'Standard only' },
-  { key: 'premium', label: 'Premium only' },
-  { key: 'signature', label: 'Signature only' },
-];
-
-const CATALOGUE_DOWNLOAD_PATH = '/food-catalogue.pdf';
-
-export default function FoodCatalogueClient({ categories = [], items = [] }) {
   const topLevelCategories = useMemo(
     () => categories.filter(category => !category.parentId),
     [categories],
   );
+
+  const categoryMap = useMemo(() => {
+    const map = new Map();
+    categories.forEach(category => {
+      if (category && category._id) {
+        map.set(category._id, category);
+      }
+    });
+    return map;
+  }, [categories]);
 
   const hasCategories = topLevelCategories.length > 0;
 
   const [activeCategoryId, setActiveCategoryId] = useState(() => topLevelCategories[0]?._id || null);
   const [activeChildId, setActiveChildId] = useState(null);
   const [activeTierFilter, setActiveTierFilter] = useState('all');
+
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [occasion, setOccasion] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventTime, setEventTime] = useState('');
+  const [location, setLocation] = useState('');
+  const [guestCount, setGuestCount] = useState('');
+  const [notes, setNotes] = useState('');
+  const [feedbackMessage, setFeedbackMessage] = useState('');
 
   const childCategories = useMemo(
     () => categories.filter(category => category.parentId === activeCategoryId),
@@ -92,6 +46,18 @@ export default function FoodCatalogueClient({ categories = [], items = [] }) {
       setActiveChildId(null);
     }
   }, [childCategories]);
+
+  useEffect(() => {
+    if (!enquiryEnabled) {
+      setSelectedItems([]);
+    }
+  }, [enquiryEnabled]);
+
+  useEffect(() => {
+    if (!enquiryEnabled) {
+      setSelectedItems([]);
+    }
+  }, [enquiryEnabled]);
 
   const activeCategory = useMemo(
     () => categories.find(category => category._id === activeCategoryId) || null,
@@ -141,6 +107,94 @@ export default function FoodCatalogueClient({ categories = [], items = [] }) {
     () => tierFilters.filter(option => option.key === 'all' || groupedByTier.some(group => group.key === option.key)),
     [groupedByTier],
   );
+
+  const toggleItemSelection = useCallback(item => {
+    setSelectedItems(prev => {
+      const exists = prev.some(selected => selected._id === item._id);
+      if (exists) {
+        return prev.filter(selected => selected._id !== item._id);
+      }
+      const payload = {
+        _id: item._id,
+        name: item.name,
+        tier: normaliseTier(item.tier),
+        categoryId: item.categoryId,
+      };
+      return [...prev, payload];
+    });
+  }, []);
+
+  const removeSelectedItem = useCallback(itemId => {
+    setSelectedItems(prev => prev.filter(item => item._id !== itemId));
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedItems([]);
+    setFeedbackMessage('');
+  }, []);
+
+  const buildWhatsappMessage = useCallback(() => {
+    const lines = [
+      'Hello Atmiya Caterers,',
+      '',
+      'I would like to discuss catering for an upcoming event.',
+      `Occasion: ${occasion || 'Not specified'}`,
+      `Event date: ${eventDate || 'Not specified'}`,
+      `Event time: ${eventTime || 'Not specified'}`,
+      `Expected guests: ${guestCount || 'Not specified'}`,
+      `Location: ${location || 'Not specified'}`,
+      '',
+      'Selected dishes:',
+    ];
+
+    selectedItems.forEach((item, index) => {
+      const tierLabel = tierMeta[item.tier]?.label || item.tier;
+      const categoryName = categoryMap.get(item.categoryId)?.name || 'Category';
+      lines.push(`${index + 1}. ${item.name} (${tierLabel}) - ${categoryName}`);
+    });
+
+    if (notes) {
+      lines.push('', `Notes: ${notes}`);
+    }
+
+    lines.push('', 'Sent from the Atmiya Caterers food catalogue.');
+
+    return lines.join('\n');
+  }, [categoryMap, eventDate, eventTime, guestCount, location, notes, occasion, selectedItems]);
+
+  const handleSendEnquiry = useCallback(() => {
+    if (!enquiryEnabled) {
+      return;
+    }
+    if (!selectedItems.length) {
+      setFeedbackMessage('Add at least one dish to your selection.');
+      return;
+    }
+    if (!whatsappReady) {
+      setFeedbackMessage('This enquiry feature is not fully configured yet. Please contact us directly.');
+      return;
+    }
+
+    const phone = sanitisePhoneNumber(whatsappNumber);
+    if (!phone) {
+      setFeedbackMessage('Unable to send message because the WhatsApp number looks invalid.');
+      return;
+    }
+
+    const message = buildWhatsappMessage();
+    const encoded = encodeURIComponent(message);
+    const url = `https://wa.me/${phone}?text=${encoded}`;
+
+    if (typeof window !== 'undefined') {
+      window.open(url, '_blank');
+      setFeedbackMessage('Opening WhatsApp in a new tab...');
+    }
+  }, [buildWhatsappMessage, enquiryEnabled, selectedItems.length, whatsappNumber, whatsappReady]);
+
+  const formattedWhatsapp = whatsappNumber
+    ? (whatsappNumber.startsWith('+') ? whatsappNumber : `+${whatsappNumber}`)
+    : '';
+  const selectionAllowed = enquiryEnabled;
 
   const accentColor = getAccentColor(activeCategory?.accentColor);
   const heroImage = activeCategory?.heroImage || null;

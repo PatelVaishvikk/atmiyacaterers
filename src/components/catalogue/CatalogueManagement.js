@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 
 const linesToArray = value =>
   (value || '')
@@ -440,6 +440,46 @@ export default function CatalogueManagement({
         </button>
       </div>
 
+      <div className="item-card" style={{ marginBottom: '20px' }}>
+        <h3>Client WhatsApp enquiries</h3>
+        <p className="text-sm text-gray-600">Allow visitors to compile dishes and send you the request straight on WhatsApp.</p>
+        {settingsError && (
+          <p className="text-sm text-red-500">{settingsError}</p>
+        )}
+        <div className="form-group" style={{ marginTop: '10px' }}>
+          <label>
+            <input
+              type="checkbox"
+              checked={enquiryEnabled}
+              onChange={event => setEnquiryEnabled(event.target.checked)}
+              style={{ marginRight: '10px' }}
+              disabled={enquirySettingsLoading}
+            />
+            Enable catalogue enquiries via WhatsApp
+          </label>
+        </div>
+        <div className="form-group">
+          <label>WhatsApp number (with country code)</label>
+          <input
+            type="tel"
+            value={whatsappNumber}
+            onChange={event => setWhatsappNumber(event.target.value)}
+            placeholder="+14161234567"
+            disabled={!enquiryEnabled || enquirySettingsLoading}
+          />
+        </div>
+        <div className="btn-group">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSaveEnquirySettings}
+            disabled={savingEnquirySettings || enquirySettingsLoading}
+          >
+            {savingEnquirySettings ? 'Saving...' : 'Save enquiry settings'}
+          </button>
+        </div>
+      </div>
+
       {activeTab === 'categories' && (
         <>
           <div className="btn-group">
@@ -810,6 +850,8 @@ export default function CatalogueManagement({
     </div>
   );
 }
+
+
 
 
 

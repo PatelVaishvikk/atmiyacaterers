@@ -52,7 +52,7 @@ export default async function FoodCataloguePage() {
   return (
     <div className="bg-gradient-to-br from-white via-orange-50 to-white py-16">
       <div className={tailwindContainer}>
-        <FoodCatalogueClient categories={fullCategoryList} items={items} />
+        <FoodCatalogueClient categories={fullCategoryList} items={items} settings={settings} />
       </div>
     </div>
   );
