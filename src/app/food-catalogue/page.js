@@ -49,6 +49,11 @@ export default async function FoodCataloguePage() {
   const fullCategoryList = [...orderedTopCategories, ...categories.filter(category => category.parentId)];
   const tailwindContainer = 'mx-auto max-w-6xl px-4 sm:px-6 lg:px-8';
 
+  // Define settings object with environment variables
+  const settings = {
+    whatsappNumber: process.env.NEXT_PUBLIC_CATERER_WHATSAPP || '',
+  };
+
   return (
     <div className="bg-gradient-to-br from-white via-orange-50 to-white py-16">
       <div className={tailwindContainer}>
@@ -57,4 +62,3 @@ export default async function FoodCataloguePage() {
     </div>
   );
 }
-
