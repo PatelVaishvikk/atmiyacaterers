@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { computeDefaultItemPrice } from '@/data/catalogueDefaults';
 
 const COLLECTION = 'catalogueItems';
 const CATEGORY_COLLECTION = 'catalogueCategories';
@@ -76,7 +77,13 @@ export async function PUT(request, { params }) {
     const client = await clientPromise;
     const db = client.db();
 
+    const existingItem = await db.collection(COLLECTION).findOne({ _id: itemId });
+    if (!existingItem) {
+      return NextResponse.json({ error: 'Item not found' }, { status: 404 });
+    }
+
     const update = {};
+    let basePriceExplicit = false;
 
     if (payload.name !== undefined) {
       update.name = (payload.name || '').trim();
@@ -121,6 +128,13 @@ export async function PUT(request, { params }) {
     if (payload.priceNote !== undefined) {
       update.priceNote = (payload.priceNote || '').trim() || null;
     }
+    if (payload.basePrice !== undefined) {
+      const numeric = Number(payload.basePrice);
+      if (Number.isFinite(numeric) && numeric >= 0) {
+        update.basePrice = Math.round(numeric * 100) / 100;
+        basePriceExplicit = true;
+      }
+    }
     if (payload.isActive !== undefined) {
       update.isActive = Boolean(payload.isActive);
     }
@@ -139,6 +153,12 @@ export async function PUT(request, { params }) {
     if (payload.slug !== undefined || payload.name) {
       const baseSlug = slugify(payload.slug || update.name || payload.name);
       update.slug = await ensureUniqueSlug(db, baseSlug, itemId);
+    }
+
+    const nextName = update.name !== undefined ? update.name : existingItem.name;
+    const nextTier = update.tier !== undefined ? update.tier : existingItem.tier;
+    if (!basePriceExplicit && (update.name !== undefined || update.tier !== undefined) && nextName) {
+      update.basePrice = computeDefaultItemPrice(nextName, nextTier);
     }
 
     update.updatedAt = new Date();

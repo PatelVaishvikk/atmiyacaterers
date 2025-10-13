@@ -242,6 +242,10 @@ export default function AdminDashboard() {
     }
   }, [activeSection, fetchCatalogueData]);
 
+  useEffect(() => {
+    fetchCatalogueData();
+  }, [fetchCatalogueData]);
+
   return (
     <div className="admin-container">
       <aside className="sidebar">
@@ -2396,15 +2400,18 @@ function PlannerManagement({ showMessage }) {
         description: category.description || '',
         maxSelections: category.maxSelections ?? '',
         minSelections: category.minSelections ?? '',
-        itemsText: ensureArray(category.items)
-          .map(item => {
-            const parts = [item.id || '', item.name || '']
-            if (item.description) {
-              parts.push(item.description)
-            }
-            return parts.join('|')
-          })
-          .join('\\n'),
+        categoryIds: ensureArray(category.categoryIds)
+          .map(entry => (entry && entry.toString ? entry.toString() : entry))
+          .filter(Boolean),
+        includeChildCategories: category.includeChildCategories !== false,
+        tierFilter:
+          typeof category.tierFilter === 'string' && category.tierFilter
+            ? category.tierFilter.toLowerCase()
+            : 'all',
+        pricingMode:
+          typeof category.pricingMode === 'string' && category.pricingMode
+            ? category.pricingMode
+            : 'auto',
       }))
     )
 
@@ -2538,7 +2545,20 @@ function PlannerManagement({ showMessage }) {
   }
 
   const addMenuCategory = useCallback(() => {
-    setMenuCategories(prev => [...prev, { id: '', label: '', description: '', maxSelections: '', minSelections: '', itemsText: '' }])
+    setMenuCategories(prev => [
+      ...prev,
+      {
+        id: '',
+        label: '',
+        description: '',
+        maxSelections: '',
+        minSelections: '',
+        categoryIds: [],
+        includeChildCategories: true,
+        tierFilter: 'all',
+        pricingMode: 'auto',
+      },
+    ])
   }, [])
 
   const updateMenuCategory = (index, key, value) => {
@@ -2599,33 +2619,41 @@ function PlannerManagement({ showMessage }) {
         .filter(addon => addon.name),
       menuBuilderCategories: menuCategories
         .map((category, index) => {
-          const items = category.itemsText
-            .split(/\r?\n/)
-            .map(line => line.trim())
+          const categoryIds = ensureArray(category.categoryIds)
+            .map(entry => (entry && entry.toString ? entry.toString() : entry))
+            .map(entry => (entry ? entry.trim() : entry))
             .filter(Boolean)
-            .map((line, itemIndex) => {
-              const [rawId = '', rawName = '', rawDescription = ''] = line.split('|').map(part => part.trim())
-              const name = rawName || rawId || `Item ${itemIndex + 1}`
-              return {
-                id: (rawId || slugify(name, `item-${itemIndex + 1}`)).trim(),
-                name,
-                ...(rawDescription ? { description: rawDescription } : {}),
-              }
-            })
-          return {
+
+          if (!categoryIds.length) {
+            return null
+          }
+
+          const tierKey = (category.tierFilter || 'all').toString().toLowerCase()
+          const tierFilter = ['all', 'standard', 'premium', 'signature'].includes(tierKey) ? tierKey : 'all'
+
+          const payload = {
             id: (category.id || slugify(category.label, `category-${index + 1}`)).trim(),
             label: category.label.trim() || `Category ${index + 1}`,
             description: category.description.trim(),
-            ...(toOptionalNumber(category.maxSelections) !== undefined
-              ? { maxSelections: toOptionalNumber(category.maxSelections) }
-              : {}),
-            ...(toOptionalNumber(category.minSelections) !== undefined
-              ? { minSelections: toOptionalNumber(category.minSelections) }
-              : {}),
-            items,
+            categoryIds,
+            includeChildCategories: category.includeChildCategories !== false,
+            tierFilter,
+            pricingMode: category.pricingMode || 'auto',
           }
+
+          const maxSelections = toOptionalNumber(category.maxSelections)
+          const minSelections = toOptionalNumber(category.minSelections)
+
+          if (maxSelections !== undefined) {
+            payload.maxSelections = maxSelections
+          }
+          if (minSelections !== undefined) {
+            payload.minSelections = minSelections
+          }
+
+          return payload
         })
-        .filter(category => category.items.length),
+        .filter(Boolean),
       onboardingChecklist: checklistText
         .split(/\r?\n/)
         .map(line => line.trim())
@@ -2764,6 +2792,28 @@ function PlannerManagement({ showMessage }) {
     ],
     [addEventType, addServiceLevel, addMenuCollection, addExperienceAddon, addMenuCategory, scrollToSection]
   )
+
+  const catalogueCategoryOptions = useMemo(() => {
+    const map = new Map()
+    ensureArray(catalogueCategories).forEach(category => {
+      const id = category?._id?.toString?.() ?? category?._id
+      if (id) {
+        map.set(id, category)
+      }
+    })
+
+    const options = ensureArray(catalogueCategories).map(category => {
+      const id = category?._id?.toString?.() ?? category?._id
+      const parentId = category?.parentId?.toString?.() ?? category?.parentId
+      const parent = parentId ? map.get(parentId) : null
+      const label = parent
+        ? `${parent.name || parent.slug || parentId} → ${category.name || category.slug || id}`
+        : category.name || category.slug || id
+      return { id, label }
+    })
+
+    return options.sort((a, b) => (a.label || '').localeCompare(b.label || ''))
+  }, [catalogueCategories])
 
   useEffect(() => {
     if (!plannerSectionsMeta.length) {
@@ -3102,7 +3152,10 @@ function PlannerManagement({ showMessage }) {
                   Add category
                 </button>
               </header>
-              <p className="planner-section__description">These control the dish selection checklists (e.g., sabjis, breads). Each line below follows the format <strong>id|name|description</strong>.</p>
+              <p className="planner-section__description">
+                Link planner categories to catalogue categories so guests can pick dishes directly from your published
+                catalogue.
+              </p>
               {menuCategories.length === 0 && <p className="empty-note">No categories configured.</p>}
               {menuCategories.map((category, index) => (
                 <div key={category.id || index} className="planner-card">
@@ -3131,13 +3184,58 @@ function PlannerManagement({ showMessage }) {
                     <textarea rows={2} value={category.description} onChange={event => updateMenuCategory(index, 'description', event.target.value)} />
                   </label>
                   <label className="field">
-                    <span>Options (one per line)</span>
-                    <textarea
-                      rows={4}
-                      value={category.itemsText}
-                      placeholder="id|name|description"
-                      onChange={event => updateMenuCategory(index, 'itemsText', event.target.value)}
-                    />
+                    <span>Catalogue categories</span>
+                    <select
+                      multiple
+                      disabled={catalogueCategoryOptions.length === 0}
+                      size={Math.min(8, Math.max(4, catalogueCategoryOptions.length || 4))}
+                      value={category.categoryIds}
+                      onChange={event =>
+                        updateMenuCategory(
+                          index,
+                          'categoryIds',
+                          Array.from(event.target.selectedOptions).map(option => option.value),
+                        )
+                      }
+                    >
+                      {catalogueCategoryOptions.map(option => (
+                        <option key={option.id} value={option.id}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    {catalogueCategoryOptions.length === 0 ? (
+                      <span className="help-text">
+                        No catalogue categories found. Add categories in the catalogue tab to power menu selections.
+                      </span>
+                    ) : (
+                      <span className="help-text">
+                        Hold Ctrl (Windows) or Command (Mac) to select multiple categories.
+                      </span>
+                    )}
+                  </label>
+                  <div className="field">
+                    <span>Include child categories</span>
+                    <label className="toggle-label">
+                      <input
+                        type="checkbox"
+                        checked={category.includeChildCategories !== false}
+                        onChange={event => updateMenuCategory(index, 'includeChildCategories', event.target.checked)}
+                      />
+                      <span>Auto-include dishes from linked sub-categories</span>
+                    </label>
+                  </div>
+                  <label className="field">
+                    <span>Tier filter</span>
+                    <select
+                      value={category.tierFilter || 'all'}
+                      onChange={event => updateMenuCategory(index, 'tierFilter', event.target.value)}
+                    >
+                      <option value="all">All tiers</option>
+                      <option value="standard">Standard only</option>
+                      <option value="premium">Premium only</option>
+                      <option value="signature">Signature only</option>
+                    </select>
                   </label>
                 </div>
               ))}

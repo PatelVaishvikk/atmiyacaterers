@@ -259,6 +259,25 @@ const toSortValue = value => {
   return Number.isFinite(numeric) ? numeric : 0;
 };
 
+export const catalogueTierPriceBands = {
+  standard: { base: 32, spread: 14 },
+  premium: { base: 48, spread: 16 },
+  signature: { base: 64, spread: 18 },
+};
+
+export const computeDefaultItemPrice = (name, tier = 'standard') => {
+  const key = (tier || 'standard').toLowerCase();
+  const band = catalogueTierPriceBands[key] || { base: 105, spread: 20 };
+  const input = (name || '').toString();
+  let hash = 0;
+  for (let index = 0; index < input.length; index += 1) {
+    hash = (hash * 31 + input.charCodeAt(index)) % 9973;
+  }
+  const adjustment = band.spread ? hash % band.spread : 0;
+  const resolved = Math.max(18, band.base + adjustment);
+  return Math.round(resolved);
+};
+
 export function buildDefaultCatalogueSnapshot() {
   const categories = [];
   const categoryMap = new Map();
@@ -323,6 +342,7 @@ export function buildDefaultCatalogueSnapshot() {
           const slug = `${entry.categorySlug}-${toSlug(name)}`;
           items.push({
             _id: slug,
+            basePrice: computeDefaultItemPrice(name, tier),
             name,
             slug,
             description: '',

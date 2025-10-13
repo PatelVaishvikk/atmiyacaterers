@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ensureDefaultCategories, ensureDefaultItems } from '@/lib/catalogueSeed';
+import { buildDefaultCatalogueSnapshot } from '@/data/catalogueDefaults';
 
 const CATEGORY_COLLECTION = 'catalogueCategories';
 const ITEM_COLLECTION = 'catalogueItems';

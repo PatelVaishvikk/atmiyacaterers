@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ensureDefaultCategories, ensureDefaultItems } from '@/lib/catalogueSeed';
+import { computeDefaultItemPrice } from '@/data/catalogueDefaults';
 import { ObjectId } from 'mongodb';
 
 const COLLECTION = 'catalogueItems';
@@ -32,6 +33,14 @@ const normaliseItem = item => {
     categoryId: categoryId ? categoryId.toString() : null,
     ...rest,
   };
+};
+
+const resolveBasePrice = (name, tier, input) => {
+  const numeric = Number(input);
+  if (Number.isFinite(numeric) && numeric >= 0) {
+    return Math.round(numeric * 100) / 100;
+  }
+  return computeDefaultItemPrice(name, tier);
 };
 
 const sanitiseArray = value => {
@@ -105,12 +114,14 @@ export async function POST(request) {
     const tier = (payload.tier || 'standard').toLowerCase();
     const allowedTiers = ['standard', 'premium', 'signature'];
     const resolvedTier = allowedTiers.includes(tier) ? tier : 'standard';
+    const basePrice = resolveBasePrice(payload.name, resolvedTier, payload.basePrice);
 
     const now = new Date();
     const doc = {
       name: (payload.name || '').trim(),
       slug: await ensureUniqueSlug(db, slugify(payload.slug || payload.name)),
       description: (payload.description || '').trim(),
+      basePrice,
       highlights: sanitiseArray(payload.highlights),
       priceNote: (payload.priceNote || '').trim() || null,
       tier: resolvedTier,

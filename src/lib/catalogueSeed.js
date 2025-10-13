@@ -1,4 +1,4 @@
-import { catalogueCategoryDefaults, catalogueMainCourseChildren, catalogueItemDefaults } from '@/data/catalogueDefaults';
+import { catalogueCategoryDefaults, catalogueMainCourseChildren, catalogueItemDefaults, computeDefaultItemPrice } from '@/data/catalogueDefaults';
 
 const CATEGORY_COLLECTION = 'catalogueCategories';
 const ITEM_COLLECTION = 'catalogueItems';
@@ -137,6 +137,7 @@ export async function ensureDefaultItems(db, categoryMapInput) {
           seedDocuments.push({
             name,
             slug,
+            basePrice: computeDefaultItemPrice(name, tier),
             tier,
             categoryId: category._id,
             description: '',
@@ -159,9 +160,30 @@ export async function ensureDefaultItems(db, categoryMapInput) {
   }
 
   const existingItems = await itemsCollection
-    .find({ slug: { $in: Array.from(desiredSlugs) } }, { projection: { slug: 1 } })
+    .find(
+      { slug: { $in: Array.from(desiredSlugs) } },
+      { projection: { _id: 1, slug: 1, name: 1, tier: 1, basePrice: 1 } },
+    )
     .toArray();
   const existingSlugs = new Set(existingItems.map(item => item.slug));
+
+  const priceBackfillOps = existingItems
+    .filter(item => item.basePrice === undefined || item.basePrice === null)
+    .map(item => ({
+      updateOne: {
+        filter: { _id: item._id },
+        update: {
+          $set: {
+            basePrice: computeDefaultItemPrice(item.name, item.tier),
+            updatedAt: timestamp,
+          },
+        },
+      },
+    }));
+
+  if (priceBackfillOps.length) {
+    await itemsCollection.bulkWrite(priceBackfillOps);
+  }
 
   const sortTracker = new Map();
   const documentsToInsert = [];

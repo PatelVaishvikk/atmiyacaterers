@@ -51,6 +51,7 @@ export default function CatalogueManagement({
     description: '',
     categoryId: '',
     tier: 'standard',
+    basePrice: '',
     highlights: '',
     tags: '',
     dietary: '',
@@ -293,11 +294,18 @@ export default function CatalogueManagement({
       const url = editingItem
         ? `/api/admin/catalogue/items/${editingItem._id}`
         : '/api/admin/catalogue/items';
+      const basePriceValue =
+        itemForm.basePrice === '' || itemForm.basePrice === null
+          ? undefined
+          : Number(itemForm.basePrice)
+
       const payload = {
         name: itemForm.name,
         description: itemForm.description,
         categoryId: itemForm.categoryId,
         tier: itemForm.tier,
+        basePrice:
+          Number.isFinite(basePriceValue) && basePriceValue >= 0 ? basePriceValue : undefined,
         highlights: linesToArray(itemForm.highlights),
         tags: linesToArray(itemForm.tags),
         dietary: linesToArray(itemForm.dietary),
@@ -345,6 +353,8 @@ export default function CatalogueManagement({
       description: item?.description || '',
       categoryId: item?.categoryId || '',
       tier: item?.tier || 'standard',
+      basePrice:
+        item?.basePrice === undefined || item?.basePrice === null ? '' : String(item.basePrice),
       highlights: arrayToText(item?.highlights),
       tags: arrayToText(item?.tags),
       dietary: arrayToText(item?.dietary),
@@ -696,6 +706,17 @@ export default function CatalogueManagement({
                   </select>
                 </div>
                 <div className="form-group">
+                  <label>Base price (per guest)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={itemForm.basePrice}
+                    onChange={event => setItemForm({ ...itemForm, basePrice: event.target.value })}
+                    placeholder="45"
+                  />
+                </div>
+                <div className="form-group">
                   <label>Sort order</label>
                   <input
                     type="number"
@@ -824,6 +845,16 @@ export default function CatalogueManagement({
                 <h4>{item.name}</h4>
                 <p><strong>Category:</strong> {getCategoryLabel(item.categoryId)}</p>
                 <p><strong>Tier:</strong> {item.tier || 'standard'}</p>
+                {item.basePrice !== undefined && item.basePrice !== null && item.basePrice !== '' && (
+                  <p>
+                    <strong>Base price:</strong>{' '}
+                    {Number(item.basePrice).toLocaleString('en-CA', {
+                      style: 'currency',
+                      currency: 'CAD',
+                      maximumFractionDigits: 0,
+                    })}
+                  </p>
+                )}
                 {item.description && (
                   <p><strong>Description:</strong> {item.description}</p>
                 )}

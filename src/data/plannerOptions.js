@@ -178,6 +178,17 @@ export const defaultPlannerConfig = {
       ],
     },
     {
+      id: 'signature-specials',
+      label: 'Signature Specials',
+      description: 'Chef-crafted live stations and wow factors.',
+      maxSelections: 2,
+      items: [
+        { id: 'signature-pav-bhaji', name: 'Bombay Pav Bhaji Bar' },
+        { id: 'signature-tawa-rumal', name: 'Tawa Sabzi Rumali Roll' },
+        { id: 'signature-mini-chelo', name: 'Mini Chelo Kebabs' },
+      ],
+    },
+    {
       id: 'beverage-bar',
       label: 'Beverage Bar',
       description: 'Curate refreshing sips throughout the celebration.',
