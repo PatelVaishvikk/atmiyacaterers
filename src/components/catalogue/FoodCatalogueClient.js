@@ -420,9 +420,9 @@
 //   );
 // }
 
+'use client';
 
-
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, use } from 'react';
 
 // Utility functions
 const sanitisePhoneNumber = (phone) => {
