@@ -318,6 +318,15 @@ export default function AdminDashboard() {
             </a>
           </li>
           <li className="nav-item">
+            <a className="nav-link"
+               href="/planner"
+               target="_blank"
+               rel="noopener noreferrer">
+              <i className="fas fa-calendar-plus"></i>
+              Plan Your Event
+            </a>
+          </li>
+          <li className="nav-item">
             <a className="nav-link" href="/admin/checkin" target="_blank">
               <i className="fas fa-qrcode"></i>
               Check-In System
@@ -622,7 +631,7 @@ export default function AdminDashboard() {
           display: flex;
           align-items: center;
         }
-        
+
         .card {
           background: rgba(255, 255, 255, 0.1);
           border-radius: 15px;

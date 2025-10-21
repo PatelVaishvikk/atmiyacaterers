@@ -101,6 +101,7 @@ const CATALOGUE_DOWNLOAD_PATH = '/food-catalogue.pdf';
 const WHATSAPP_NUMBER = sanitiseNumber(process.env.NEXT_PUBLIC_CATERER_WHATSAPP);
 
 export default function PlannerPage() {
+  const [hasMounted, setHasMounted] = useState(false);
   const [planner, setPlanner] = useState(fallbackPlanner);
   const [plannerEnabled, setPlannerEnabled] = useState(fallbackEnabled);
   const [plannerMessage, setPlannerMessage] = useState('');
@@ -125,6 +126,10 @@ export default function PlannerPage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [submitFeedback, setSubmitFeedback] = useState(null);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -438,6 +443,22 @@ export default function PlannerPage() {
       return (a.item.name || '').localeCompare(b.item.name || '');
     });
   }, [selectionList, categoryMap]);
+
+  if (!hasMounted) {
+    return (
+      <div className="bg-gradient-to-br from-white via-orange-50 to-white py-16">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+          <section className="rounded-3xl border border-orange-200/60 bg-white/80 p-8 shadow-sm backdrop-blur">
+            <p className="text-xs uppercase tracking-[0.3em] text-orange-500">Menu planner</p>
+            <h1 className="mt-3 text-3xl font-extrabold text-gray-900 sm:text-4xl">Loading planner...</h1>
+            <p className="mt-4 max-w-3xl text-base text-gray-600">
+              Please hold on while we prepare the live menu planner experience for you.
+            </p>
+          </section>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-br from-white via-orange-50 to-white py-16">
