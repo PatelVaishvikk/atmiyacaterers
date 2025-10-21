@@ -2327,6 +2327,7 @@ function PlannerManagement({ showMessage }) {
   const [serviceLevels, setServiceLevels] = useState([])
   const [menuCollections, setMenuCollections] = useState([])
   const [experienceAddons, setExperienceAddons] = useState([])
+  const [catalogueCategories, setCatalogueCategories] = useState([])
   const [menuCategories, setMenuCategories] = useState([])
   const [checklistText, setChecklistText] = useState(buildChecklistString(defaultPlannerConfig.onboardingChecklist))
   const [error, setError] = useState('')
@@ -2445,9 +2446,29 @@ function PlannerManagement({ showMessage }) {
     }
   }, [hydrateFromConfig])
 
+  const loadCatalogueCategories = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/catalogue/categories', { cache: 'no-store' })
+      if (!response.ok) {
+        throw new Error(`Failed to fetch catalogue categories (${response.status})`)
+      }
+      const text = await response.text()
+      if (!text) {
+        setCatalogueCategories([])
+        return
+      }
+      const data = JSON.parse(text)
+      setCatalogueCategories(Array.isArray(data) ? data : [])
+    } catch (err) {
+      console.error('Failed to load catalogue categories for planner', err)
+      setCatalogueCategories([])
+    }
+  }, [])
+
   useEffect(() => {
     loadSettings()
-  }, [loadSettings])
+    loadCatalogueCategories()
+  }, [loadSettings, loadCatalogueCategories])
 
   const addEventType = useCallback(() => {
     setEventTypes(prev => [...prev, { id: '', name: '', description: '', pricePerGuest: '', highlight: '' }])
