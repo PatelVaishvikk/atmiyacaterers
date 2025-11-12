@@ -36,11 +36,11 @@ export default function Hero() {
         </div>
 
         <h1 className="mb-6 text-4xl font-serif font-bold text-white drop-shadow-lg sm:text-5xl md:text-7xl">
-          Atmiya <span className="text-accent">Caterers</span>
-          <br />Taste the Tradition, Feel the Devotion
+          Best Indian & Gujarati Caterers
+          <br />in Windsor • Toronto • Etobicoke • London • Waterloo
         </h1>
         <p className="mx-auto mb-8 max-w-2xl text-base text-gray-200 sm:text-lg md:text-xl">
-          From intimate gatherings to grand celebrations, we craft unforgettable culinary moments that delight your guests and honour Gujarati hospitality.
+          Atmiya Caterers brings authentic Gujarati hospitality, premium Indian flavours, and fully custom menus to weddings, corporate galas, garba nights, and house parties across Southwestern Ontario and the GTA.
         </p>
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link href="/food-catalogue" className="btn-secondary px-10 py-4 text-lg">

@@ -10,6 +10,9 @@ export const servicesData = [
       "Beautiful presentation",
       "Dietary accommodations",
     ],
+    ctaLabel: "Plan My Wedding Feast",
+    ctaMessage:
+      "Hi Atmiya Caterers,\nWe are hosting a wedding in ___ on ___ for ___ guests. Please share Gujarati/Indian wedding menu ideas and pricing.",
   },
   {
     title: "Corporate Events",
@@ -22,6 +25,9 @@ export const servicesData = [
       "Office parties",
       "Product launches",
     ],
+    ctaLabel: "Curate Our Corporate Menu",
+    ctaMessage:
+      "Hello Atmiya team,\nWe need corporate catering for ___ guests on ___. Kindly send menu recommendations, service styles, and a quote.",
   },
   {
     title: "Private Parties",
@@ -34,6 +40,9 @@ export const servicesData = [
       "Family gatherings",
       "Holiday events",
     ],
+    ctaLabel: "Celebrate With Atmiya",
+    ctaMessage:
+      "Hi there,\nI am planning a private party for ___ guests on ___. Could you suggest Gujarati favorites and pricing options?",
   },
   {
     title: "Daily Tiffin Service",
@@ -46,6 +55,9 @@ export const servicesData = [
       "Home delivery",
       "Customizable options",
     ],
+    ctaLabel: "Subscribe To Tiffin Plan",
+    ctaMessage:
+      "Namaste Atmiya,\nI would like details about your daily tiffin plans for ___ people starting ___. Please share menus and delivery info.",
   },
   {
     title: "Event Planning",
@@ -58,6 +70,9 @@ export const servicesData = [
       "Timeline planning",
       "Day-of coordination",
     ],
+    ctaLabel: "Coordinate My Event",
+    ctaMessage:
+      "Hello,\nI need end-to-end event planning support for ___ on ___. Please outline your coordination services and investment.",
   },
   {
     title: "Specialty Cuisine",
@@ -70,5 +85,8 @@ export const servicesData = [
       "Regional Indian thalis",
       "Custom culinary experiences",
     ],
+    ctaLabel: "Design A Signature Menu",
+    ctaMessage:
+      "Hi Chef team,\nWe would love a custom Gujarati/Indian fusion menu for ___ guests. Please share chef station ideas and pricing.",
   },
 ];

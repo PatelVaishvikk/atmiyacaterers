@@ -2,52 +2,30 @@
 
 import { servicesData } from '@/data/services'
 import Image from 'next/image'
-import Link from 'next/link'
-import { usePlannerAvailability } from '@/hooks/usePlannerAvailability'
-import { useEffect, useRef, useState } from 'react'
+
+const CATERING_EMAIL = 'atmiyacaterers@gmail.com'
+const WHATSAPP_NUMBER = '+1 (519) 992-7920'
+
+const sanitisePhoneNumber = phone => phone.replace(/[^\d]/g, '')
+
+const buildEmailLink = (subject, body) =>
+  `mailto:${CATERING_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+
+const buildWhatsappLink = (message) => {
+  const digits = sanitisePhoneNumber(WHATSAPP_NUMBER)
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`
+}
 
 export default function Services() {
-  const cardRefs = useRef([])
-  const [revealedCards, setRevealedCards] = useState(() =>
-    servicesData.map(() => false)
-  )
-
-  const { enabled: plannerEnabled } = usePlannerAvailability()
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const targets = cardRefs.current.filter(Boolean)
-
-    if (!('IntersectionObserver' in window)) {
-      setRevealedCards(servicesData.map(() => true))
-      return
-    }
-
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const index = Number(entry.target.dataset.index)
-            setRevealedCards(prev => {
-              if (prev[index]) return prev
-              const updated = [...prev]
-              updated[index] = true
-              return updated
-            })
-          }
-        })
-      },
-      { threshold: 0.35 }
-    )
-
-    targets.forEach(card => observer.observe(card))
-
-    return () => {
-      targets.forEach(card => observer.unobserve(card))
-      observer.disconnect()
-    }
-  }, [])
+  const primaryMessage = 'Hi Atmiya Caterers,\nI am planning an event in ___ on ___ for ___ guests.\nPlease share curated Gujarati/Indian menu ideas, service styles, and pricing.\n\nThank you!'
+  const globalEmailLink = buildEmailLink('Plan Catering with Atmiya', primaryMessage)
+  const globalWhatsappLink = buildWhatsappLink(primaryMessage)
+  const highlightLabels = servicesData
+    .map(service => ({
+      title: service.title,
+      subtitle: service.ctaLabel ?? `Book ${service.title}`
+    }))
+    .slice(0, 6)
 
   return (
     <section className="section-padding bg-light">
@@ -63,15 +41,9 @@ export default function Services() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {servicesData.map((service, index) => {
-            const isRevealed = revealedCards[index]
-
             return (
               <div
                 key={index}
-                ref={el => {
-                  cardRefs.current[index] = el
-                }}
-                data-index={index}
                 className="group relative overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl focus-within:-translate-y-2 focus-within:shadow-2xl"
               >
                 <div className="relative h-48 w-full overflow-hidden">
@@ -105,33 +77,6 @@ export default function Services() {
                       </li>
                     ))}
                   </ul>
-                  <div
-                    className={`md:hidden transition-all duration-500 ease-out ${
-                      isRevealed
-                        ? 'translate-y-0 opacity-100'
-                        : 'translate-y-8 opacity-0'
-                    }`}
-                  >
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary via-accent to-secondary p-6 text-white shadow-xl">
-                      <div className="absolute -right-10 top-1/2 h-28 w-28 -translate-y-1/2 rounded-full bg-white/25 blur-3xl" aria-hidden="true" />
-                      <div className="relative flex flex-col gap-4">
-                        <div>
-                          <h4 className="text-lg font-semibold uppercase tracking-wide text-white/90">
-                            {plannerEnabled ? 'Build Your Menu' : 'Request A Quote'}
-                          </h4>
-                          <p className="text-sm text-white/80">
-                            {plannerEnabled ? 'Share your guest count and craft a custom Gujarati feast in minutes.' : 'Tell us about your celebration and our team will shape a personalised plan.'}
-                          </p>
-                        </div>
-                        <Link
-                          href={plannerEnabled ? '/planner' : '/contact'}
-                          className="inline-flex items-center justify-center rounded-full bg-white/15 px-5 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow-lg backdrop-blur transition hover:bg-white/30"
-                        >
-                          {plannerEnabled ? 'Start Planning' : 'Request A Quote'}
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="hidden text-white md:pointer-events-none md:absolute md:inset-0 md:flex md:translate-y-full md:flex-col md:justify-between md:bg-secondary/95 md:p-8 md:transition-transform md:duration-300 md:ease-out md:group-hover:translate-y-0 md:group-hover:pointer-events-auto md:group-focus-within:translate-y-0 md:group-focus-within:pointer-events-auto">
@@ -155,17 +100,49 @@ export default function Services() {
                         </li>
                       ))}
                     </ul>
-                    <Link
-                      href={plannerEnabled ? '/planner' : '/contact'}
-                      className="hidden md:inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 font-semibold text-white shadow-lg transition hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-                    >
-                      {plannerEnabled ? 'Plan Your Event' : 'Request A Quote'}
-                    </Link>
                   </div>
                 </div>
               </div>
             )
           })}
+        </div>
+
+        <div className="mt-16 rounded-3xl bg-gradient-to-br from-secondary via-accent to-primary p-8 text-white shadow-2xl">
+          <div className="grid gap-8 lg:grid-cols-[2fr_3fr]">
+            <div className="space-y-4">
+              <p className="text-sm uppercase tracking-[0.3em] text-white/80">Work With Atmiya</p>
+              <h3 className="text-3xl font-serif font-semibold">
+                Tell us once. We curate menus, staffing, rentals, and tasting sessions for every city we serve.
+              </h3>
+              <p className="text-white/90">
+                Drop your guest count, dietary notes, and venue details—our catering desk replies within 24 hours on your preferred channel.
+              </p>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <a
+                  href={globalEmailLink}
+                  className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 font-semibold text-secondary shadow-lg transition hover:bg-white/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  Email Our Catering Desk
+                </a>
+                <a
+                  href={globalWhatsappLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-full border border-white/60 px-6 py-3 font-semibold text-white transition hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                >
+                  WhatsApp {WHATSAPP_NUMBER}
+                </a>
+              </div>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {highlightLabels.map(highlight => (
+                <div key={highlight.title} className="rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
+                  <p className="text-xs uppercase tracking-wide text-white/80">{highlight.title}</p>
+                  <p className="mt-2 text-lg font-semibold text-white">{highlight.subtitle}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
