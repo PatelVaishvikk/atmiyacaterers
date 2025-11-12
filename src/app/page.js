@@ -8,6 +8,7 @@ import HomeGallery from '@/components/HomeGallery';
 // import Testimonials from '@/components/Testimonials';
 import WhatsAppTestimonials from '@/components/WhatsAppTestimonials';
 import RegionalServiceAreas from '@/components/RegionalServiceAreas';
+import FAQSection from '@/components/FAQSection';
 
 export default function Home() {
   const [adminLoggedIn, setAdminLoggedIn] = useState(false);
@@ -44,6 +45,7 @@ export default function Home() {
       <Services />
       <HomeGallery />
       <RegionalServiceAreas />
+      <FAQSection />
       {/* <Testimonials /> */}
       <WhatsAppTestimonials />
     </>
