@@ -7,7 +7,6 @@ import Services from '@/components/Services';
 import HomeGallery from '@/components/HomeGallery';
 // import Testimonials from '@/components/Testimonials';
 import WhatsAppTestimonials from '@/components/WhatsAppTestimonials';
-import RegionalServiceAreas from '@/components/RegionalServiceAreas';
 import FAQSection from '@/components/FAQSection';
 
 export default function Home() {
@@ -44,7 +43,6 @@ export default function Home() {
       {/* <HomeExperience /> */}
       <Services />
       <HomeGallery />
-      <RegionalServiceAreas />
       <FAQSection />
       {/* <Testimonials /> */}
       <WhatsAppTestimonials />

@@ -17,6 +17,7 @@ export default function Header() {
     // { name: 'Menu',       href: '/menu' },
     // { name: 'Daily Menu', href: '/daily-menu' },
     { name: 'Gallery',      href: '/gallery' },
+    { name: 'Locations',    href: '/locations' },
     { name: 'Contact',      href: '/contact' },
     { name: 'Testimonials', href: '/testimonials' },
     // { name: '🎭 Order here', href: '/garba-booking', special: true },
@@ -25,7 +26,7 @@ export default function Header() {
   return (
     <header className="bg-white shadow-lg sticky top-0 z-50">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-3 sm:py-4">
+        <div className="flex flex-nowrap items-center justify-between gap-4 py-3 sm:py-4">
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
               <div className="relative w-9 h-9 sm:w-10 sm:h-10">
@@ -48,7 +49,7 @@ export default function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`font-medium transition-colors duration-200 ${
+                className={`font-medium whitespace-nowrap transition-colors duration-200 ${
                   item.special
                     ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-blue-700'
                     : 'text-gray-700 hover:text-primary'
@@ -89,7 +90,7 @@ export default function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`block px-3 py-2 font-medium transition-colors duration-200 ${
+                  className={`block px-3 py-2 font-medium whitespace-nowrap transition-colors duration-200 ${
                     item.special
                       ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg mx-2 my-1 hover:from-purple-700 hover:to-blue-700'
                       : 'text-gray-700 hover:text-primary'
