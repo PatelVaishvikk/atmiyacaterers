@@ -1,7 +1,9 @@
 'use client'
 
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { servicesData } from '@/data/services'
 import Image from 'next/image'
+import { motion } from 'framer-motion'
 
 const CATERING_EMAIL = 'atmiyacaterers@gmail.com'
 const WHATSAPP_NUMBER = '+1 (519) 992-7920'
@@ -16,6 +18,14 @@ const buildWhatsappLink = (message) => {
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`
 }
 
+const slugify = value =>
+  value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 }
+}
+
 export default function Services() {
   const primaryMessage = 'Hi Atmiya Caterers,\nI am planning an event in ___ on ___ for ___ guests.\nPlease share curated Gujarati/Indian menu ideas, service styles, and pricing.\n\nThank you!'
   const globalEmailLink = buildEmailLink('Plan Catering with Atmiya', primaryMessage)
@@ -26,6 +36,45 @@ export default function Services() {
       subtitle: service.ctaLabel ?? `Book ${service.title}`
     }))
     .slice(0, 6)
+
+  const serviceNav = useMemo(
+    () =>
+      servicesData.map(service => ({
+        id: slugify(service.title),
+        title: service.title
+      })),
+    []
+  )
+  const [activeNav, setActiveNav] = useState(serviceNav[0]?.id || '')
+  const cardRefs = useRef({})
+
+  const handleNavClick = useCallback((id) => {
+    setActiveNav(id)
+    const node = cardRefs.current[id]
+    if (node) {
+      node.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
+    }
+  }, [])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && entry.target.id) {
+            setActiveNav(entry.target.id)
+          }
+        })
+      },
+      { rootMargin: '-45% 0px -45% 0px', threshold: 0.1 }
+    )
+
+    const nodes = Object.values(cardRefs.current)
+    nodes.forEach(node => node && observer.observe(node))
+
+    return () => {
+      nodes.forEach(node => node && observer.unobserve(node))
+    }
+  }, [serviceNav])
 
   return (
     <section className="section-padding bg-light">
@@ -39,12 +88,43 @@ export default function Services() {
           </p>
         </div>
 
+        <div className="sticky top-16 z-10 mb-10 -mx-4 bg-light/95 px-4 py-3 shadow-sm sm:static sm:bg-transparent sm:px-0 sm:py-0 sm:shadow-none">
+          <div className="flex gap-3 overflow-x-auto no-scrollbar">
+            {serviceNav.map(item => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleNavClick(item.id)}
+                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  activeNav === item.id
+                    ? 'bg-primary text-white shadow-lg'
+                    : 'bg-white text-gray-600 hover:text-primary'
+                }`}
+              >
+                {item.title}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {servicesData.map((service, index) => {
+            const anchorId = serviceNav[index]?.id || `${index}`
             return (
-              <div
-                key={index}
+              <motion.div
+                key={anchorId}
+                id={anchorId}
+                ref={el => {
+                  if (el) {
+                    cardRefs.current[anchorId] = el
+                  }
+                }}
                 className="group relative overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl focus-within:-translate-y-2 focus-within:shadow-2xl"
+                variants={cardVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
               >
                 <div className="relative h-48 w-full overflow-hidden">
                   <Image
@@ -102,7 +182,7 @@ export default function Services() {
                     </ul>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )
           })}
         </div>

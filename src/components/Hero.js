@@ -58,7 +58,7 @@ export default function Hero() {
         transition={{ duration: 0.8 }}
         className="relative z-10 px-4 text-center max-w-4xl"
       >
-        <div className="relative mx-auto mb-3 h-44 w-44 sm:h-56 sm:w-56 md:h-[340px] md:w-[340px]">
+        <div className="relative mx-auto mb-2 h-44 w-44 sm:h-56 sm:w-56 md:h-[330px] md:w-[330px]">
           <Image
             src="/images/logo.png"
             alt="Atmiya Catering Logo"
@@ -69,16 +69,16 @@ export default function Hero() {
           <div className="absolute inset-2 rounded-full border border-accent/60 animate-pulse" aria-hidden="true" />
         </div>
 
-        <div className="mx-auto mb-3 inline-flex items-center gap-3 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-lg backdrop-blur sm:text-sm">
+        <div className="mx-auto mb-3 inline-flex items-center gap-3 rounded-full bg-white/15 px-4 py-1 text-[0.75rem] font-semibold uppercase tracking-[0.3em] text-white shadow-lg backdrop-blur sm:text-xs">
           <span role="img" aria-label="sparkles">✨</span> Taste the Tradition, Feel the Devotion <span role="img" aria-label="sparkles">✨</span>
         </div>
 
-        <h1 className="mb-5 flex flex-col gap-3 font-serif font-bold text-white drop-shadow-lg">
+        <h1 className="mb-4 flex flex-col gap-3 font-serif font-bold text-white drop-shadow-lg">
           <span className="text-2xl leading-snug sm:text-3xl md:text-4xl">
             Best Indian & Gujarati Caterers in
           </span>
           <span
-            className="text-4xl leading-tight text-accent sm:text-5xl md:text-7xl"
+            className="text-3xl leading-tight text-accent sm:text-5xl md:text-7xl"
             aria-live="polite"
           >
             {displayedCity || '\u00A0'}
@@ -86,7 +86,7 @@ export default function Hero() {
           </span>
         </h1>
         <p className="mx-auto mb-6 text-base text-gray-200 sm:text-lg md:text-xl">
-          Atmiya Caterers blends authentic Gujarati hospitality with chef-driven menus for weddings, corporate galas, garba nights, and intimate celebrations across Southwestern Ontario and the GTA.
+          Atmiya Caterers blends Gujarati hospitality with chef-driven menus for weddings, corporate galas, garba nights, and intimate celebrations across Southwestern Ontario.
         </p>
         <div className="flex w-full flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
           <Link href="/food-catalogue" className="btn-secondary w-full px-8 py-3 text-base sm:w-auto sm:px-10 sm:py-4 sm:text-lg">
