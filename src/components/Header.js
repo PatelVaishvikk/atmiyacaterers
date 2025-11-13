@@ -25,10 +25,10 @@ export default function Header() {
   return (
     <header className="bg-white shadow-lg sticky top-0 z-50">
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-3 sm:py-4">
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="relative w-10 h-10">
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10">
                 <Image
                   src="/images/logo.png"
                   alt="Atmiya Catering Logo"
@@ -36,7 +36,7 @@ export default function Header() {
                   className="object-cover rounded-full"
                 />
               </div>
-              <span className="text-2xl font-serif font-bold text-secondary">
+              <span className="text-xl sm:text-2xl font-serif font-bold text-secondary leading-tight">
                 Atmiya Caterers
               </span>
             </Link>
@@ -70,7 +70,7 @@ export default function Header() {
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 hover:text-primary focus:outline-none"
+              className="text-gray-700 hover:text-primary focus:outline-none p-2"
               aria-label="Toggle Menu"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
