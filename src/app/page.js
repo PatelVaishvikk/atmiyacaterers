@@ -8,6 +8,7 @@ import HomeGallery from '@/components/HomeGallery';
 // import Testimonials from '@/components/Testimonials';
 import WhatsAppTestimonials from '@/components/WhatsAppTestimonials';
 import FAQSection from '@/components/FAQSection';
+import FloatingCTA from '@/components/FloatingCTA';
 
 export default function Home() {
   const [adminLoggedIn, setAdminLoggedIn] = useState(false);
@@ -46,6 +47,7 @@ export default function Home() {
       <FAQSection />
       {/* <Testimonials /> */}
       <WhatsAppTestimonials />
+      <FloatingCTA />
     </>
   );
 

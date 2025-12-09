@@ -22,8 +22,19 @@ const slugify = value =>
   value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0 }
+  hidden: { opacity: 0, y: 50, rotateX: -10 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    rotateX: 0,
+    transition: { type: "spring", stiffness: 60, damping: 20 }
+  },
+  hover: { 
+    y: -12, 
+    rotateX: 2, 
+    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+    transition: { duration: 0.3 }
+  }
 }
 
 export default function Services() {
@@ -77,10 +88,10 @@ export default function Services() {
   }, [serviceNav])
 
   return (
-    <section className="section-padding bg-light">
+    <section className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-light">
       <div className="container">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-secondary mb-4">
+          <h2 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4">
             Our Services
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -88,17 +99,17 @@ export default function Services() {
           </p>
         </div>
 
-        <div className="sticky top-16 z-10 mb-10 -mx-4 bg-light/95 px-4 py-3 shadow-sm sm:static sm:bg-transparent sm:px-0 sm:py-0 sm:shadow-none">
-          <div className="flex gap-3 overflow-x-auto no-scrollbar">
+        <div className="sticky top-16 z-10 mb-10 -mx-4 bg-light/95 px-4 py-3 shadow-sm sm:static sm:bg-transparent sm:px-0 sm:py-0 sm:shadow-none backdrop-blur-md sm:backdrop-blur-none">
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 sm:pb-0">
             {serviceNav.map(item => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => handleNavClick(item.id)}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
+                className={`whitespace-nowrap rounded-full border px-6 py-2 text-sm font-semibold transition-all duration-300 ${
                   activeNav === item.id
-                    ? 'bg-primary text-white shadow-lg'
-                    : 'bg-white text-gray-600 hover:text-primary'
+                    ? 'border-primary bg-primary text-white shadow-md'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-secondary hover:text-secondary'
                 }`}
               >
                 {item.title}
@@ -119,12 +130,11 @@ export default function Services() {
                     cardRefs.current[anchorId] = el
                   }
                 }}
-                className="group relative overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl focus-within:-translate-y-2 focus-within:shadow-2xl"
-                variants={cardVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
+                className="group relative overflow-hidden rounded-2xl bg-white shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <div className="relative h-48 w-full overflow-hidden">
                   <Image

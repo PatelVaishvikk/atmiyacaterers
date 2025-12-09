@@ -8,15 +8,16 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#ff6b35',
-        secondary: '#2c3e50',
-        accent: '#f39c12',
-        light: '#ecf0f1',
-        dark: '#34495e'
+        primary: '#ea580c', // Orange-600 (Requested Orange)
+        secondary: '#1f2937', // Gray-800 for text contrast
+        accent: '#f59e0b', // Amber-500
+        light: '#ffffff',
+        dark: '#1c1917'
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        serif: ['Playfair Display', 'serif']
+        sans: ['var(--font-inter)', 'sans-serif'],
+        serif: ['var(--font-playfair)', 'serif'],
+        gujarati: ['var(--font-shrikhand)', 'cursive']
       }
     },
   },

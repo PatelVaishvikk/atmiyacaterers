@@ -52,7 +52,7 @@ export default function FAQSection() {
     <section className="section-padding bg-white">
       <div className="container">
         <div className="mx-auto mb-12 max-w-3xl text-center">
-          <p className="text-sm uppercase tracking-[0.3em] text-primary">FAQs</p>
+          <p className="text-sm uppercase tracking-[0.3em] text-secondary">FAQs</p>
           <h2 className="mt-3 text-4xl font-serif font-bold text-secondary">Questions planners ask us the most</h2>
           <p className="mt-4 text-lg text-gray-600">
             Transparent answers about travel, dietary needs, staffing, tastings, and planning timelines so you can book with confidence.
@@ -63,7 +63,7 @@ export default function FAQSection() {
             <details key={faq.question} className="group" open={index === 0}>
               <summary className="flex cursor-pointer items-center justify-between gap-4 px-6 py-5 text-left">
                 <span className="text-lg font-semibold text-secondary">{faq.question}</span>
-                <span className="text-primary transition group-open:rotate-45">＋</span>
+                <span className="text-secondary transition group-open:rotate-45">＋</span>
               </summary>
               <div className="px-6 pb-6 text-gray-700 leading-relaxed">{faq.answer}</div>
             </details>

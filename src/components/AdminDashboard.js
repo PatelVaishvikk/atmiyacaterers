@@ -79,32 +79,61 @@ export default function AdminDashboard() {
 
   const testDatabaseConnection = async () => {
     try {
-      const response = await fetch('/api/admin/test');
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
+      const response = await fetch('/api/admin/test', { cache: 'no-store' });
       const text = await response.text();
+      const checkedAt = new Date().toISOString();
+
       if (!text) {
-        setTestResult({ error: 'Empty response from server' });
+        setTestResult({
+          success: false,
+          error: 'Empty response from server',
+          status: response.status,
+          checkedAt,
+        });
         return;
       }
-      
+
       let data;
       try {
         data = JSON.parse(text);
       } catch (parseError) {
         console.error('JSON parse error for test API:', parseError);
         console.error('Response text:', text);
-        setTestResult({ error: 'Invalid JSON response from server' });
+        setTestResult({
+          success: false,
+          error: 'Invalid JSON response from server',
+          details: text,
+          status: response.status,
+          checkedAt,
+        });
         return;
       }
-      
-      setTestResult(data);
+
+      if (!response.ok || !data?.success) {
+        setTestResult({
+          success: false,
+          error: data?.error || 'Database test failed',
+          details: data?.details || data?.message || null,
+          status: response.status,
+          checkedAt,
+        });
+        return;
+      }
+
+      setTestResult({
+        ...data,
+        status: response.status,
+        checkedAt,
+      });
     } catch (error) {
       console.error('Database connection test error:', error);
-      setTestResult({ error: 'Failed to test connection', details: error.message });
+      setTestResult({
+        success: false,
+        error: 'Failed to test connection',
+        details: error.message,
+        status: 'network-error',
+        checkedAt: new Date().toISOString(),
+      });
     }
   };
 
@@ -198,6 +227,15 @@ export default function AdminDashboard() {
     setMessage({ text: msg, type });
     setTimeout(() => setMessage(''), 3000);
   };
+
+  const connectionStatusLabel = testResult === null
+    ? '⏳ Testing...'
+    : testResult?.success
+      ? '✅ Connected'
+      : '❌ Disconnected';
+  const lastCheckedLabel = testResult?.checkedAt
+    ? new Date(testResult.checkedAt).toLocaleString()
+    : null;
 
   useEffect(() => {
     testDatabaseConnection();
@@ -338,7 +376,7 @@ export default function AdminDashboard() {
       <main className="main-content">
         <div className="header">
           <h1>Welcome to Admin Dashboard!</h1>
-          <p>Database Connection: {testResult?.success ? '✅ Connected' : '❌ Disconnected'}</p>
+          <p>Database Connection: {connectionStatusLabel}</p>
           {message && (
             <div className={`message ${message.type}`}>
               {message.text}
@@ -383,6 +421,22 @@ export default function AdminDashboard() {
             <div className="card">
               <h3>Database Connection Test</h3>
               <pre>{JSON.stringify(testResult, null, 2)}</pre>
+              {testResult?.status && (
+                <p style={{ color: '#4b5563', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                  Response status: {testResult.status}
+                </p>
+              )}
+              {testResult?.error && (
+                <p style={{ color: '#b91c1c', marginTop: '0.5rem' }}>
+                  {testResult.error}
+                  {testResult?.details ? ` — ${testResult.details}` : ''}
+                </p>
+              )}
+              {lastCheckedLabel && (
+                <p style={{ color: '#6b7280', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                  Last checked: {lastCheckedLabel}
+                </p>
+              )}
               <button onClick={testDatabaseConnection} className="btn btn-primary">
                 Test Connection Again
               </button>

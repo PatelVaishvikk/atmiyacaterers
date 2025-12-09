@@ -31,16 +31,15 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1;
+    @apply bg-primary hover:bg-primary/90 text-light px-6 py-3 md:px-8 md:py-3 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/60;
   }
 
   .btn-secondary {
-    @apply bg-secondary hover:bg-secondary/90 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300;
+    @apply bg-secondary hover:bg-secondary/90 text-light px-6 py-3 md:px-8 md:py-3 rounded-full font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary/60;
   }
 
   .section-padding {
-    
-    @apply py-16 px-4 sm:px-6 lg:px-8;
+    @apply py-12 px-4 sm:py-16 sm:px-6 lg:px-8;
   }
 
   .container {
@@ -48,6 +47,6 @@
   }
 
   .gradient-bg {
-    @apply bg-gradient-to-br from-primary via-accent to-primary;
+    @apply bg-gradient-to-br from-primary via-blue-800 to-primary;
   }
 }

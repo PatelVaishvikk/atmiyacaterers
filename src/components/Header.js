@@ -13,7 +13,7 @@ export default function Header() {
     { name: 'About',        href: '/about' },
     { name: 'Services',     href: '/services' },
     { name: 'Food Catalogue', href: '/food-catalogue' },
-    { name: 'Tiffin Plans', href: '/tiffin-plans' },
+
     // { name: 'Menu',       href: '/menu' },
     // { name: 'Daily Menu', href: '/daily-menu' },
     { name: 'Gallery',      href: '/gallery' },

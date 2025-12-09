@@ -1,6 +1,72 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+
+const CUSTOMER_REVIEWS = [
+  {
+    id: 1,
+    name: 'Vandita Patel',
+    lastSeen: 'online',
+    messages: [
+      { text: 'Hello', time: '2:28 PM', type: 'customer' },
+      { text: 'The food was absolutely delicious😍', time: '2:29 PM', type: 'customer' },
+      { text: 'I ordered one yesterday and it was tasty and felt soo much homely, thank you', time: '2:30 PM', type: 'customer' },
+      { text: "Hello, ma'am, glad you liked it. Thank you for your feedback.", time: '2:31 PM', type: 'business' },
+    ],
+    orderType: 'Tiffin',
+    location: 'Windsor, ON',
+    screenshot: '/images/reviews/vandita-patel-review.jpg',
+    screenshotWidth: 1284,
+    screenshotHeight: 1192,
+  },
+  {
+    id: 2,
+    name: 'Smit Rana',
+    lastSeen: 'online',
+    messages: [
+      { text: 'Are bro jordar', time: '11:40 AM', type: 'customer' },
+      { text: 'Sabji kadhi mast ek dam', time: '11:41 AM', type: 'customer' },
+      { text: 'And Roti to peli vaar mane mara sivay bija koi ni gami , Aabhar', time: '11:42 AM', type: 'customer' },
+      { text: 'Best', time: '11:43 AM', type: 'business' },
+    ],
+    orderType: 'Tiffin',
+    location: 'Windsor, ON',
+    screenshot: '/images/reviews/ssss.jpg',
+    screenshotWidth: 1284,
+    screenshotHeight: 755,
+  },
+  {
+    id: 3,
+    name: 'Swara',
+    lastSeen: '2 min ago',
+    messages: [
+      { text: 'Hi, thank you! We picked up the tiffin :)', time: '1:18 PM', type: 'customer' },
+      { text: "Food is really good today.. we would like to continue for monthly from 15th August if that's possible", time: '1:35 PM', type: 'customer' },
+      { text: 'Thank you for making your special day perfect! Congratulations! 🎉', time: '6:18 PM', type: 'business' },
+    ],
+    orderType: 'Tiffin',
+    location: 'Windsor, ON',
+    screenshot: '/images/reviews/swara.jpg',
+    screenshotWidth: 1284,
+    screenshotHeight: 648,
+  },
+  {
+    id: 4,
+    name: 'Meet',
+    lastSeen: '5 min ago',
+    messages: [
+      { text: 'Hello Meet bhai, Rasoi Kevi Lagi ? Let us know the feedback', time: '1:13 PM', type: 'business' },
+      { text: 'Hello, the food was really good, quality and quantity. Thank you', time: '1:10 PM', type: 'customer' },
+    ],
+    orderType: 'Tiffin',
+    location: 'Windsor, ON',
+    screenshot: '/images/reviews/meet.jpg',
+    screenshotWidth: 1284,
+    screenshotHeight: 791,
+  },
+];
 
 const WhatsAppTestimonials = () => {
   const [currentChat, setCurrentChat] = useState(0);
@@ -13,61 +79,7 @@ const WhatsAppTestimonials = () => {
     setMounted(true);
   }, []);
 
-  const customerReviews = [
-    {
-      id: 1,
-      name: "Vandita Patel",
-      lastSeen: "online",
-      messages: [
-        { text: "Hello", time: "2:28 PM", type: "customer" },
-        { text: "The food was absolutely delicious😍", time: "2:29 PM", type: "customer" },
-        { text: "I ordered one yesterday and it was tasty and felt soo much homely, thank you", time: "2:30 PM", type: "customer" },
-        { text: "Hello, ma'am, glad you liked it. Thank you for your feedback.", time: "2:31 PM", type: "business" },
-      ],
-      orderType: "Tiffin",
-      location: "Windsor, ON",
-      screenshot: "/images/reviews/vandita-patel-review.jpg"
-    },
-    {
-      id: 2,
-      name: "Smit Rana",
-      lastSeen: "online",
-      messages: [
-        { text: "Are bro jordar", time: "11:40 AM", type: "customer" },
-        { text: "Sabji kadhi mast ek dam", time: "11:41 AM", type: "customer" },
-        { text: "And Roti to peli vaar mane mara sivay bija koi ni gami , Aabhar", time: "11:42 AM", type: "customer" },
-        { text: "Best", time: "11:43 AM", type: "business" },
-      ],
-      orderType: "Tiffin",
-      location: "Windsor, ON",
-      screenshot: "/images/reviews/ssss.jpg"
-    },
-    {
-      id: 3,
-      name: "Swara",
-      lastSeen: "2 min ago",
-      messages: [
-        { text: "Hi, thank you! We picked up the tiffin :)", time: "1:18 PM", type: "customer" },
-        { text: "Food is really good today.. we would like to continue for monthly from 15th August if that's possible", time: "1:35 PM", type: "customer" },
-        { text: "Thank you for making your special day perfect! Congratulations! 🎉", time: "6:18 PM", type: "business" },
-      ],
-      orderType: "Tiffin",
-      location: "Windsor, ON",
-      screenshot: "/images/reviews/swara.jpg"
-    },
-    {
-      id: 4,
-      name: "Meet",
-      lastSeen: "5 min ago",
-      messages: [
-        { text: "Hello Meet bhai, Rasoi Kevi Lagi ? Let us know the feedback", time: "1:13 PM", type: "business" },
-        { text: "Hello, the food was really good, quality and quantity. Thank you", time: "1:10 PM", type: "customer" },
-      ],
-      orderType: "Tiffin",
-      location: "Windsor, ON",
-      screenshot: "/images/reviews/meet.jpg"
-    }
-  ];
+  const customerReviews = CUSTOMER_REVIEWS;
 
   // Auto-rotate every 7 seconds (matches comment)
   useEffect(() => {
@@ -79,7 +91,7 @@ const WhatsAppTestimonials = () => {
       }, 500);
     }, 7000);
     return () => clearInterval(timer);
-  }, []); // customerReviews is constant here
+  }, [customerReviews.length]);
 
   // Show messages one by one when chat changes
   useEffect(() => {
@@ -101,14 +113,14 @@ const WhatsAppTestimonials = () => {
         }
       }, index * 800);
     });
-  }, [currentChat]);
+  }, [currentChat, customerReviews]);
 
   const currentReview = customerReviews[currentChat];
 
   // Avatar from initials
   const getAvatar = (name) => {
     const initials = name.split(' ').map(w => w[0]).join('').toUpperCase();
-    const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500'];
+    const colors = ['bg-blue-700', 'bg-emerald-700', 'bg-purple-700', 'bg-pink-700', 'bg-indigo-700'];
     const colorIndex = name.length % colors.length;
 
     return (
@@ -119,28 +131,35 @@ const WhatsAppTestimonials = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-gray-100 py-12 px-4">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 1 }}
+      className="min-h-screen bg-gradient-to-br from-gray-50 to-white py-12 px-4"
+    >
       <div className="max-w-6xl mx-auto">
 
         {/* Section header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-            <span className="text-3xl">💬</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Real Customer Reviews</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+
+          <h2 className="text-3xl md:text-5xl font-serif font-bold text-primary mb-4">Real Customer Reviews</h2>
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
             See what our customers are saying about us through authentic WhatsApp conversations
           </p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           {/* Phone mockup */}
-          <div className="bg-gray-900 rounded-3xl p-4 shadow-2xl w-full max-w-md mx-auto lg:sticky lg:top-8">
-            <div className="bg-black rounded-2xl p-2">
-              <div className="bg-white rounded-xl overflow-hidden">
+          <div className="bg-dark rounded-[2.5rem] p-3 shadow-2xl w-full max-w-md mx-auto lg:sticky lg:top-8 border-4 border-gray-800" role="presentation">
+            <div className="bg-black rounded-[2rem] overflow-hidden relative">
+              {/* Notch */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 h-6 w-32 bg-black z-20 rounded-b-xl"></div>
+              
+              <div className="bg-white h-[480px] overflow-hidden flex flex-col relative z-10">
 
                 {/* Status bar */}
-                <div className="bg-green-600 px-4 py-3 flex justify-between items-center text-sm text-white">
+                <div className="bg-emerald-900 px-4 py-3 flex justify-between items-center text-sm text-white">
                   <span>9:41</span>
                   <div className="flex items-center gap-1">
                     <span className="text-xs">WhatsApp</span>
@@ -161,7 +180,7 @@ const WhatsAppTestimonials = () => {
                 </div>
 
                 {/* Chat header */}
-                <div className="bg-green-500 text-white px-4 py-3 flex items-center gap-3">
+                <div className="bg-emerald-800 text-white px-4 py-3 flex items-center gap-3">
                   <div className="flex items-center gap-3 flex-1">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
@@ -169,7 +188,7 @@ const WhatsAppTestimonials = () => {
                     {getAvatar(currentReview.name)}
                     <div className="flex-1">
                       <div className="font-semibold text-sm">{currentReview.name}</div>
-                      <div className="text-xs text-green-100">{currentReview.lastSeen}</div>
+                      <div className="text-xs text-white">{currentReview.lastSeen}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -183,7 +202,7 @@ const WhatsAppTestimonials = () => {
                 </div>
 
                 {/* Messages */}
-                <div className="h-80 bg-gray-100 p-4 overflow-y-auto">
+                <div className="flex-1 bg-gray-100 p-4 overflow-y-auto">
                   <div className="text-center mb-4">
                     <span className="bg-green-800 text-white px-3 py-1 rounded-full text-xs shadow-sm">Today</span>
                   </div>
@@ -203,12 +222,12 @@ const WhatsAppTestimonials = () => {
                             className={`max-w-xs px-4 py-3 rounded-2xl text-sm ${
                               isCustomer
                                 ? 'bg-white text-gray-900 rounded-bl-md shadow-sm'
-                                : 'bg-green-500 text-white rounded-br-md shadow-sm'
+                                : 'bg-emerald-700 text-white rounded-br-md shadow-sm'
                             }`}
                           >
                             <div className="leading-relaxed mb-1">{message.text}</div>
                             <div className={`text-xs flex items-center justify-end gap-1 ${
-                              isCustomer ? 'text-gray-500' : 'text-green-100'
+                              isCustomer ? 'text-gray-700' : 'text-white'
                             }`}>
                               <span>{message.time}</span>
                               {!isCustomer && <span className="text-xs">✓✓</span>}
@@ -310,22 +329,36 @@ const WhatsAppTestimonials = () => {
             </div>
 
             {/* Navigation dots */}
-            <div className="flex justify-center gap-2 mt-6">
-              {customerReviews.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setIsTransitioning(true);
-                    setTimeout(() => {
-                      setCurrentChat(index);
-                      setIsTransitioning(false);
-                    }, 300);
-                  }}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    index === currentChat ? 'bg-green-500 scale-125' : 'bg-gray-300 hover:bg-gray-400'
-                  }`}
-                />
-              ))}
+            <div className="flex flex-wrap justify-center gap-3 mt-6">
+              {customerReviews.map((review, index) => {
+                const isActive = index === currentChat;
+                return (
+                  <button
+                    key={review.id}
+                    type="button"
+                    aria-label={`Show WhatsApp review from ${review.name}`}
+                    title={`Show WhatsApp review from ${review.name}`}
+                    aria-pressed={isActive}
+                    onClick={() => {
+                      setIsTransitioning(true);
+                      setTimeout(() => {
+                        setCurrentChat(index);
+                        setIsTransitioning(false);
+                      }, 300);
+                    }}
+                    className={`flex h-12 w-12 items-center justify-center rounded-full border transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500 ${
+                      isActive ? 'border-green-600 bg-green-50 shadow-md' : 'border-gray-200 bg-white hover:bg-gray-50'
+                    }`}
+                  >
+                    <span
+                      className={`block h-3 w-3 rounded-full ${
+                        isActive ? 'bg-green-600' : 'bg-gray-400'
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -345,13 +378,17 @@ const WhatsAppTestimonials = () => {
                   </div>
                 </div>
 
-                <img
+                <Image
                   src={review.screenshot}
                   alt={`WhatsApp conversation with ${review.name}`}
-                  className="block"
+                  width={review.screenshotWidth}
+                  height={review.screenshotHeight}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="h-auto w-full rounded-xl border border-gray-200 bg-white object-cover shadow-inner"
+                  loading="lazy"
                 />
 
-                <div className="mt-3 text-xs text-gray-500">
+                <div className="mt-3 text-xs text-gray-600">
                   💬 {review.messages[0].text.substring(0, 50)}...
                 </div>
               </div>
@@ -360,14 +397,17 @@ const WhatsAppTestimonials = () => {
 
           <div className="text-center mt-8">
             <p className="text-gray-600 mb-4">See more real customer conversations on our WhatsApp!</p>
-            <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full text-lg transition-all transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center gap-2 mx-auto">
+            <button
+              type="button"
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full text-lg transition-all transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center gap-2 mx-auto"
+            >
               <span className="text-xl">💬</span>
               Chat with Us on WhatsApp
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

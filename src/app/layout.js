@@ -1,7 +1,25 @@
-// app/layout.js
+import { Inter, Playfair_Display, Shrikhand } from 'next/font/google'
 import './globals.css'
 import ConditionalLayout from '@/components/ConditionalLayout'
-// import AdminAccessButton from '@/components/AdminAccessButton'
+
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+})
+
+const playfair = Playfair_Display({ 
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-playfair',
+})
+
+const shrikhand = Shrikhand({
+  weight: '400',
+  subsets: ['gujarati', 'latin'],
+  display: 'swap',
+  variable: '--font-shrikhand',
+})
 
 export const metadata = {
   title: 'Atmiya Catering | Indian & Gujarati Caterers in Windsor, Toronto, Etobicoke, London & Waterloo',
@@ -75,7 +93,7 @@ const structuredData = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${playfair.variable} ${shrikhand.variable}`}>
       <head>
         {/* Add Font Awesome for icons used in admin panel */}
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -90,7 +108,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       {/* suppressHydrationWarning silences React hydration mismatches on the client */}
-      <body suppressHydrationWarning className="font-sans">
+      <body suppressHydrationWarning className="font-sans antialiased text-gray-900 bg-white">
         <ConditionalLayout>{children}</ConditionalLayout>
         {/* <AdminAccessButton /> */}
       </body>
