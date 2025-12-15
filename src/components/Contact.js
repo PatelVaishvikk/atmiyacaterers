@@ -11,19 +11,37 @@ export default function Contact() {
     message: ''
   })
 
-  const handleSubmit = (e) => {
+  const [status, setStatus] = useState({ submitting: false, info: null })
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // For now, just log the data (later connect to MongoDB)
-    console.log('Form submitted:', formData)
-    alert('Thank you for your inquiry! We will contact you soon.')
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      eventDate: '',
-      guests: '',
-      message: ''
-    })
+    setStatus({ submitting: true, info: null })
+
+    try {
+        const res = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        })
+        
+        const data = await res.json()
+        
+        if (res.ok) {
+            setStatus({ submitting: false, info: { type: 'success', msg: 'Thank you! We will get back to you soon.' } })
+            setFormData({
+                name: '',
+                email: '',
+                phone: '',
+                eventDate: '',
+                guests: '',
+                message: ''
+            })
+        } else {
+            setStatus({ submitting: false, info: { type: 'error', msg: data.error || 'Something went wrong.' } })
+        }
+    } catch (error) {
+        setStatus({ submitting: false, info: { type: 'error', msg: 'Failed to send message.' } })
+    }
   }
 
   const handleChange = (e) => {
@@ -173,9 +191,19 @@ export default function Contact() {
                   placeholder="Tell us about your event..."
                 ></textarea>
               </div>
+
+              {status.info && (
+                <div className={`p-4 rounded-lg ${status.info.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {status.info.msg}
+                </div>
+              )}
               
-              <button type="submit" className="w-full btn-primary text-lg py-4">
-                Send Message
+              <button 
+                type="submit" 
+                disabled={status.submitting}
+                className="w-full btn-primary text-lg py-4 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                {status.submitting ? 'Sending...' : 'Send Message'}
               </button>
             </form>
           </div>

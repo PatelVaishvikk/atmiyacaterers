@@ -23,7 +23,7 @@ export default function Hero() {
   return (
     <section 
       aria-labelledby="hero-heading" 
-      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-4 sm:p-6"
+      className="relative flex min-h-[75vh] sm:min-h-screen flex-col items-center justify-center overflow-hidden p-4 sm:p-6"
     >
       
       {/* 1. Background Image with Dark Overlay */}
@@ -41,14 +41,14 @@ export default function Hero() {
       </div>
 
       {/* 2. Content Container */}
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 flex flex-col items-center justify-center text-center h-full pt-0 pb-10">
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 flex flex-col items-center justify-center text-center h-full pt-0 pb-4 sm:pb-10">
         
         {/* Logo */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
-          className="relative w-60 h-60 sm:w-80 sm:h-80 -mb-6 drop-shadow-2xl"
+          className="relative w-52 h-52 sm:w-64 sm:h-64 md:w-80 md:h-80 -mb-8 sm:-mb-10 drop-shadow-2xl"
         >
           <Image
             src="/images/logo.png"
@@ -64,7 +64,7 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="mb-8 text-center font-gujarati text-2xl sm:text-3xl md:text-4xl leading-relaxed px-6 py-4 transform -rotate-1 hover:rotate-0 transition-transform duration-300"
+          className="mb-2 sm:mb-8 text-center font-gujarati text-lg sm:text-3xl md:text-4xl leading-relaxed px-6 py-2 sm:py-4 transform -rotate-1 hover:rotate-0 transition-transform duration-300"
         >
           <div className="text-slate-200">“ભાવે તો સહુ ને કહેજો,</div>
           <div className="text-amber-500 mt-1">ના ભાવે તો અમને કહેજો”</div>
@@ -75,10 +75,10 @@ export default function Hero() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="flex items-center gap-3 mb-6"
+            className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-6"
         >
             <span className="text-amber-500 text-sm">➔</span>
-            <span className="text-white/90 text-xs sm:text-sm font-bold tracking-[0.2em] uppercase">
+            <span className="text-white/90 text-[10px] sm:text-sm font-bold tracking-[0.2em] uppercase">
                 Taste the Tradition, Feel the Devotion
             </span>
             <span className="text-amber-500 text-sm">➔</span>
@@ -89,10 +89,10 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="text-3xl sm:text-5xl md:text-6xl font-serif font-bold text-white mb-4 drop-shadow-lg"
+          className="text-2xl sm:text-5xl md:text-6xl font-serif font-bold text-white mb-2 sm:mb-4 drop-shadow-lg"
         >
           Best Indian & Gujarati Caterers in
-          <div className="h-16 sm:h-20 mt-2 flex items-center justify-center text-amber-500 min-w-[300px]">
+          <div className="h-10 sm:h-20 mt-1 sm:mt-2 flex items-center justify-center text-amber-500 min-w-[200px] sm:min-w-[300px]">
              {/* Typewriter Effect */}
              <Typewriter words={locations} />
           </div>
@@ -105,7 +105,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9 }}
-          className="flex flex-col sm:flex-row gap-4 w-full justify-center items-center"
+          className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full justify-center items-center"
         >
           <Link 
             href="/food-catalogue" 
