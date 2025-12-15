@@ -48,7 +48,7 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
-          className="relative w-52 h-52 sm:w-64 sm:h-64 md:w-80 md:h-80 -mb-4 sm:-mb-10 drop-shadow-2xl"
+          className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 -mb-4 sm:-mb-10 drop-shadow-2xl"
         >
           <Image
             src="/images/logo.png"
