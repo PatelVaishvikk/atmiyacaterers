@@ -64,7 +64,7 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="mb-2 sm:mb-8 text-center font-gujarati text-lg sm:text-3xl md:text-4xl leading-relaxed px-6 py-2 sm:py-4 transform -rotate-1 hover:rotate-0 transition-transform duration-300"
+          className="mb-2 sm:mb-8 text-center font-gujarati text-2xl sm:text-3xl md:text-4xl leading-relaxed px-6 py-2 sm:py-4 transform -rotate-1 hover:rotate-0 transition-transform duration-300"
         >
           <div className="text-slate-200">“ભાવે તો સહુ ને કહેજો,</div>
           <div className="text-amber-500 mt-1">ના ભાવે તો અમને કહેજો”</div>
