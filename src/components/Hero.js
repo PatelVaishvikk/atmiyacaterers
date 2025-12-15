@@ -75,7 +75,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-6"
+            className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-6"
         >
             <span className="text-amber-500 text-sm">➔</span>
             <span className="text-white/90 text-[10px] sm:text-sm font-bold tracking-[0.2em] uppercase">
