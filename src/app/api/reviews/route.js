@@ -11,15 +11,19 @@ export async function GET(req) {
 
     const url = new URL(req.url);
     const all = url.searchParams.get('all'); // admin: fetch all including unapproved
+    const page = parseInt(url.searchParams.get('page') || '1', 10);
+    const limit = parseInt(url.searchParams.get('limit') || '9', 10);
+    const skip = (page - 1) * limit;
 
     const query = all === 'true' ? {} : { approved: true };
 
-    // Run both queries in parallel to cut network roundtrip time in half
-    const [reviews, stats] = await Promise.all([
+    // Run queries in parallel
+    const [reviews, stats, totalCount] = await Promise.all([
       db.collection('reviews')
         .find(query)
         .sort({ createdAt: -1 })
-        .limit(50)
+        .skip(skip)
+        .limit(limit)
         .toArray(),
       db.collection('reviews').aggregate([
         { $match: { approved: true } },
@@ -35,13 +39,22 @@ export async function GET(req) {
             one:   { $sum: { $cond: [{ $eq: ['$rating', 1] }, 1, 0] } },
           },
         },
-      ]).toArray()
+      ]).toArray(),
+      db.collection('reviews').countDocuments(query)
     ]);
+
+    const statsObj = stats[0] || { avgRating: 0, total: 0, five: 0, four: 0, three: 0, two: 0, one: 0 };
 
     return NextResponse.json({
       success: true,
       reviews,
-      stats: stats[0] || { avgRating: 0, total: 0, five: 0, four: 0, three: 0, two: 0, one: 0 },
+      stats: statsObj,
+      pagination: {
+        total: totalCount,
+        page,
+        limit,
+        hasMore: skip + reviews.length < totalCount
+      }
     });
   } catch (e) {
     return NextResponse.json({ success: false, error: String(e?.message || e) }, { status: 500 });

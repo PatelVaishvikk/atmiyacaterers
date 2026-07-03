@@ -72,7 +72,7 @@ function RatingBar({ label, count, total }) {
       <StarIcon filled size={12} />
       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-accent to-primary transition-all duration-700"
+          className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all duration-700"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -107,7 +107,6 @@ function ReviewCard({ review }) {
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200 flex flex-col gap-4">
-      {/* Top row */}
       <div className="flex items-start gap-3">
         {/* Avatar */}
         <div className={`${bgClass} w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm`}>
@@ -131,10 +130,8 @@ function ReviewCard({ review }) {
         </div>
       </div>
 
-      {/* Divider */}
       <div className="border-t border-gray-50" />
 
-      {/* Review text */}
       <p className="text-gray-600 text-sm leading-relaxed">
         &ldquo;{review.review}&rdquo;
       </p>
@@ -142,7 +139,29 @@ function ReviewCard({ review }) {
   );
 }
 
-// ── Shared input className ─────────────────────────────────────────────────────
+// ── Skeleton Loader Card ──────────────────────────────────────────────────────
+function ReviewSkeletonCard() {
+  return (
+    <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col gap-4 animate-pulse">
+      <div className="flex items-start gap-3">
+        <div className="w-11 h-11 rounded-full bg-gray-200 flex-shrink-0" />
+        <div className="flex-1 min-w-0 space-y-2 py-1">
+          <div className="h-4 bg-gray-200 rounded w-2/3" />
+          <div className="h-3 bg-gray-200 rounded w-1/3" />
+        </div>
+        <div className="flex flex-col items-end gap-1 flex-shrink-0 space-y-1.5">
+          <div className="h-3 bg-gray-200 rounded w-16" />
+          <div className="h-2.5 bg-gray-200 rounded w-10" />
+        </div>
+      </div>
+      <div className="border-t border-gray-50 pt-4 space-y-2">
+        <div className="h-3 bg-gray-200 rounded" />
+        <div className="h-3 bg-gray-200 rounded w-5/6" />
+      </div>
+    </div>
+  );
+}
+
 const INPUT =
   'w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-secondary placeholder-gray-400 outline-none focus:border-primary focus:ring-2 focus:ring-orange-100 transition font-sans';
 
@@ -156,17 +175,51 @@ export default function ReviewSection() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]           = useState('');
 
+  // Pagination states
+  const [page, setPage]             = useState(1);
+  const [hasMore, setHasMore]       = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+
   const [form, setForm] = useState({ name: '', email: '', rating: 0, review: '', eventType: '' });
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  useEffect(() => {
-    setLoading(true);
-    fetch('/api/reviews')
+  const fetchReviews = (pageNum, isNewSubmit = false) => {
+    if (pageNum === 1 && !isNewSubmit) {
+      setLoading(true);
+    } else if (pageNum > 1) {
+      setLoadingMore(true);
+    }
+
+    fetch(`/api/reviews?page=${pageNum}&limit=9`)
       .then((r) => r.json())
-      .then((d) => { if (d.success) { setReviews(d.reviews); setStats(d.stats); } })
+      .then((d) => {
+        if (d.success) {
+          if (pageNum === 1) {
+            setReviews(d.reviews);
+          } else {
+            setReviews((prev) => [...prev, ...d.reviews]);
+          }
+          setStats(d.stats);
+          setHasMore(d.pagination.hasMore);
+        }
+      })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setLoadingMore(false);
+      });
+  };
+
+  useEffect(() => {
+    setPage(1);
+    fetchReviews(1, submitted);
   }, [submitted]);
+
+  const loadNextPage = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchReviews(nextPage);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -324,7 +377,6 @@ export default function ReviewSection() {
           </div>
         )}
 
-
         {stats && stats.total > 0 && (
           <div className="mx-auto max-w-2xl bg-light/60 border border-gray-100 rounded-2xl shadow-sm p-6 sm:p-8 mb-10 flex flex-col sm:flex-row gap-8 items-center">
             {/* Big average */}
@@ -351,8 +403,10 @@ export default function ReviewSection() {
 
         {/* ── Review Cards ─────────────────────────────────────────────── */}
         {loading ? (
-          <div className="text-center py-20 text-gray-400">
-            <p className="text-base">Loading reviews…</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <ReviewSkeletonCard key={i} />
+            ))}
           </div>
         ) : reviews.length === 0 ? (
           <div className="text-center py-16 bg-light/60 border border-gray-100 rounded-2xl shadow-sm mb-10">
@@ -363,30 +417,40 @@ export default function ReviewSection() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
-              {reviews.slice(0, 6).map((r) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+              {reviews.map((r) => (
                 <ReviewCard key={r._id} review={r} />
               ))}
             </div>
-            {reviews.length > 6 && (
+
+            {/* Pulsing loaders for Load More actions */}
+            {loadingMore && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+                {[1, 2, 3].map((i) => (
+                  <ReviewSkeletonCard key={i} />
+                ))}
+              </div>
+            )}
+
+            {/* Load More Button */}
+            {hasMore && !loadingMore && (
               <div className="text-center mb-10">
-                <Link
-                  href="/reviews"
-                  className="inline-flex items-center gap-2 text-primary font-semibold text-sm hover:underline"
+                <button
+                  type="button"
+                  onClick={loadNextPage}
+                  className="inline-flex items-center gap-2 border border-gray-200 hover:border-primary hover:text-primary text-gray-600 font-semibold text-sm px-6 py-2.5 rounded-full transition-all duration-200 bg-white shadow-sm"
                 >
-                  View all {reviews.length} reviews
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  Load More Reviews
+                  <svg className="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                   </svg>
-                </Link>
+                </button>
               </div>
             )}
           </>
         )}
 
-
       </div>
     </section>
   );
 }
-
