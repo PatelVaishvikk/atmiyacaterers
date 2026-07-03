@@ -8,6 +8,7 @@ import HomeGallery from '@/components/HomeGallery';
 // import Testimonials from '@/components/Testimonials';
 import WhatsAppTestimonials from '@/components/WhatsAppTestimonials';
 import FAQSection from '@/components/FAQSection';
+import ReviewSection from '@/components/ReviewSection';
 import FloatingCTA from '@/components/FloatingCTA';
 
 export default function Home() {
@@ -44,6 +45,7 @@ export default function Home() {
       {/* <HomeExperience /> */}
       <Services />
       <HomeGallery />
+      <ReviewSection />
       <FAQSection />
       {/* <Testimonials /> */}
       <WhatsAppTestimonials />

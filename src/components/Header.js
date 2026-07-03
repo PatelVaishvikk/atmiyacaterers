@@ -10,13 +10,13 @@ export default function Header() {
 
   const navigation = [
     { name: 'Home',         href: '/' },
-    { name: 'About',        href: '/about' },
     { name: 'Services',     href: '/services' },
     { name: 'Food Catalogue', href: '/food-catalogue' },
 
     // { name: 'Menu',       href: '/menu' },
     // { name: 'Daily Menu', href: '/daily-menu' },
     { name: 'Gallery',      href: '/gallery' },
+    { name: 'Reviews',      href: '/reviews' },
     { name: 'Locations',    href: '/locations' },
     { name: 'Contact',      href: '/contact' },
     { name: 'Testimonials', href: '/testimonials' },
