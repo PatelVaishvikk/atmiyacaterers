@@ -14,29 +14,29 @@ export async function GET(req) {
 
     const query = all === 'true' ? {} : { approved: true };
 
-    const reviews = await db
-      .collection('reviews')
-      .find(query)
-      .sort({ createdAt: -1 })
-      .limit(50)
-      .toArray();
-
-    // Compute aggregate stats
-    const stats = await db.collection('reviews').aggregate([
-      { $match: { approved: true } },
-      {
-        $group: {
-          _id: null,
-          avgRating: { $avg: '$rating' },
-          total: { $sum: 1 },
-          five: { $sum: { $cond: [{ $eq: ['$rating', 5] }, 1, 0] } },
-          four:  { $sum: { $cond: [{ $eq: ['$rating', 4] }, 1, 0] } },
-          three: { $sum: { $cond: [{ $eq: ['$rating', 3] }, 1, 0] } },
-          two:   { $sum: { $cond: [{ $eq: ['$rating', 2] }, 1, 0] } },
-          one:   { $sum: { $cond: [{ $eq: ['$rating', 1] }, 1, 0] } },
+    // Run both queries in parallel to cut network roundtrip time in half
+    const [reviews, stats] = await Promise.all([
+      db.collection('reviews')
+        .find(query)
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .toArray(),
+      db.collection('reviews').aggregate([
+        { $match: { approved: true } },
+        {
+          $group: {
+            _id: null,
+            avgRating: { $avg: '$rating' },
+            total: { $sum: 1 },
+            five:  { $sum: { $cond: [{ $eq: ['$rating', 5] }, 1, 0] } },
+            four:  { $sum: { $cond: [{ $eq: ['$rating', 4] }, 1, 0] } },
+            three: { $sum: { $cond: [{ $eq: ['$rating', 3] }, 1, 0] } },
+            two:   { $sum: { $cond: [{ $eq: ['$rating', 2] }, 1, 0] } },
+            one:   { $sum: { $cond: [{ $eq: ['$rating', 1] }, 1, 0] } },
+          },
         },
-      },
-    ]).toArray();
+      ]).toArray()
+    ]);
 
     return NextResponse.json({
       success: true,
