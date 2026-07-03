@@ -166,10 +166,10 @@ const INPUT =
   'w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-secondary placeholder-gray-400 outline-none focus:border-primary focus:ring-2 focus:ring-orange-100 transition font-sans';
 
 // ── Main Section ───────────────────────────────────────────────────────────────
-export default function ReviewSection() {
-  const [reviews, setReviews]       = useState([]);
-  const [stats, setStats]           = useState(null);
-  const [loading, setLoading]       = useState(true);
+export default function ReviewSection({ initialReviews = [], initialStats = null, initialHasMore = false }) {
+  const [reviews, setReviews]       = useState(initialReviews);
+  const [stats, setStats]           = useState(initialStats);
+  const [loading, setLoading]       = useState(initialReviews.length === 0);
   const [showForm, setShowForm]     = useState(false);
   const [submitted, setSubmitted]   = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -177,7 +177,7 @@ export default function ReviewSection() {
 
   // Pagination states
   const [page, setPage]             = useState(1);
-  const [hasMore, setHasMore]       = useState(false);
+  const [hasMore, setHasMore]       = useState(initialHasMore);
   const [loadingMore, setLoadingMore] = useState(false);
 
   const [form, setForm] = useState({ name: '', email: '', rating: 0, review: '', eventType: '' });
@@ -211,6 +211,11 @@ export default function ReviewSection() {
   };
 
   useEffect(() => {
+    // If we have initial data from server side and this is first mount (no submission), skip fetch
+    if (initialReviews.length > 0 && page === 1 && !submitted) {
+      setLoading(false);
+      return;
+    }
     setPage(1);
     fetchReviews(1, submitted);
   }, [submitted]);
