@@ -67,7 +67,7 @@ export async function POST(request) {
     const client = await clientPromise;
     const db = client.db(process.env.MONGODB_DB || 'atmiya_caterers');
 
-    const { name, email, rating, review, eventType } = body;
+    const { name, email, rating, review, eventType, imageUrl } = body;
 
     if (!name || !name.trim()) {
       return NextResponse.json({ success: false, error: 'Name is required.' }, { status: 400 });
@@ -85,6 +85,7 @@ export async function POST(request) {
       rating: Number(rating),
       review: review.trim().slice(0, 800),
       eventType: eventType || '',
+      imageUrl: imageUrl || '',
       approved: true, // auto-approved — admin can delete from admin panel if needed
       createdAt: new Date(),
     };

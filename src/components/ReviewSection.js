@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 // ── Star Icon ──────────────────────────────────────────────────────────────────
@@ -88,7 +88,7 @@ const AVATAR_BG = [
 ];
 
 // ── Review Card ────────────────────────────────────────────────────────────────
-function ReviewCard({ review }) {
+function ReviewCard({ review, onImageClick }) {
   const initials = review.name
     .split(' ')
     .map((w) => w[0] || '')
@@ -132,9 +132,20 @@ function ReviewCard({ review }) {
 
       <div className="border-t border-gray-50" />
 
-      <p className="text-gray-600 text-sm leading-relaxed">
+      <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
         &ldquo;{review.review}&rdquo;
       </p>
+
+      {review.imageUrl && (
+        <div className="mt-2 relative rounded-xl overflow-hidden cursor-zoom-in border border-gray-100 h-44 bg-gray-50 group/img">
+          <img
+            src={review.imageUrl}
+            alt={`${review.name}'s review attachment`}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-105"
+            onClick={() => onImageClick(review.imageUrl)}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -175,12 +186,20 @@ export default function ReviewSection({ initialReviews = [], initialStats = null
   const [submitting, setSubmitting] = useState(false);
   const [error, setError]           = useState('');
 
+  // Image Upload states
+  const [uploading, setUploading]   = useState(false);
+  const [imagePreview, setImagePreview] = useState('');
+  const fileInputRef = useRef(null);
+
+  // Lightbox Modal state
+  const [lightboxImage, setLightboxImage] = useState(null);
+
   // Pagination states
   const [page, setPage]             = useState(1);
   const [hasMore, setHasMore]       = useState(initialHasMore);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const [form, setForm] = useState({ name: '', email: '', rating: 0, review: '', eventType: '' });
+  const [form, setForm] = useState({ name: '', email: '', rating: 0, review: '', eventType: '', imageUrl: '' });
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   const fetchReviews = (pageNum, isNewSubmit = false) => {
@@ -211,7 +230,6 @@ export default function ReviewSection({ initialReviews = [], initialStats = null
   };
 
   useEffect(() => {
-    // If we have initial data from server side and this is first mount (no submission), skip fetch
     if (initialReviews.length > 0 && page === 1 && !submitted) {
       setLoading(false);
       return;
@@ -226,12 +244,63 @@ export default function ReviewSection({ initialReviews = [], initialStats = null
     fetchReviews(nextPage);
   };
 
+  // Image selection and upload handler
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image file is too large. Max size is 5MB.');
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Only image files are allowed.');
+      return;
+    }
+
+    setUploading(true);
+    setError('');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && data.imageUrl) {
+        setForm((f) => ({ ...f, imageUrl: data.imageUrl }));
+        setImagePreview(data.imageUrl);
+      } else {
+        setError(data.error || 'Failed to upload image. Please try again.');
+      }
+    } catch {
+      setError('Network error during image upload.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeSelectedImage = () => {
+    setForm((f) => ({ ...f, imageUrl: '' }));
+    setImagePreview('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     if (!form.rating)                  { setError('Please choose a star rating.'); return; }
     if (!form.name.trim())             { setError('Please enter your name.'); return; }
     if (form.review.trim().length < 10){ setError('Write at least 10 characters.'); return; }
+    if (uploading)                     { setError('Please wait for the image upload to complete.'); return; }
 
     setSubmitting(true);
     try {
@@ -244,7 +313,8 @@ export default function ReviewSection({ initialReviews = [], initialStats = null
       if (data.success) {
         setSubmitted(true);
         setShowForm(false);
-        setForm({ name: '', email: '', rating: 0, review: '', eventType: '' });
+        setImagePreview('');
+        setForm({ name: '', email: '', rating: 0, review: '', eventType: '', imageUrl: '' });
       } else {
         setError(data.error || 'Something went wrong. Please try again.');
       }
@@ -361,6 +431,54 @@ export default function ReviewSection({ initialReviews = [], initialStats = null
                 <p className="text-xs text-gray-400 text-right mt-1">{form.review.length}/800</p>
               </div>
 
+              {/* Image Upload Input */}
+              <div className="flex flex-col gap-2">
+                <label className="block text-sm font-semibold text-secondary">
+                  Add Photo <span className="text-xs font-normal text-gray-400">(optional, max 5MB)</span>
+                </label>
+                
+                {!imagePreview ? (
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-gray-200 hover:border-primary rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition bg-gray-50/50 hover:bg-orange-50/10"
+                  >
+                    <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                    </svg>
+                    <span className="text-sm font-semibold text-gray-500">
+                      {uploading ? 'Uploading your photo...' : 'Click to upload a photo'}
+                    </span>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef}
+                      onChange={handleImageChange}
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </div>
+                ) : (
+                  <div className="relative rounded-xl overflow-hidden border border-gray-100 h-40 bg-gray-50 flex items-center justify-center">
+                    <img 
+                      src={imagePreview} 
+                      alt="Review preview" 
+                      className="w-full h-full object-cover"
+                    />
+                    <button 
+                      type="button"
+                      onClick={removeSelectedImage}
+                      className="absolute top-2 right-2 bg-red-600/90 text-white rounded-full p-1.5 shadow-md hover:bg-red-700 transition"
+                      aria-label="Remove image"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {error && (
                 <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3">
                   <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -374,7 +492,7 @@ export default function ReviewSection({ initialReviews = [], initialStats = null
                 <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors">
                   Cancel
                 </button>
-                <button type="submit" disabled={submitting} className="px-6 py-2.5 rounded-xl bg-primary hover:bg-orange-700 disabled:bg-gray-300 text-white text-sm font-bold shadow-md hover:shadow-lg disabled:shadow-none disabled:cursor-not-allowed transition-all duration-200">
+                <button type="submit" disabled={submitting || uploading} className="px-6 py-2.5 rounded-xl bg-primary hover:bg-orange-700 disabled:bg-gray-300 text-white text-sm font-bold shadow-md hover:shadow-lg disabled:shadow-none disabled:cursor-not-allowed transition-all duration-200">
                   {submitting ? 'Submitting…' : 'Submit Review'}
                 </button>
               </div>
@@ -424,7 +542,11 @@ export default function ReviewSection({ initialReviews = [], initialStats = null
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
               {reviews.map((r) => (
-                <ReviewCard key={r._id} review={r} />
+                <ReviewCard 
+                  key={r._id} 
+                  review={r} 
+                  onImageClick={(url) => setLightboxImage(url)} 
+                />
               ))}
             </div>
 
@@ -456,6 +578,38 @@ export default function ReviewSection({ initialReviews = [], initialStats = null
         )}
 
       </div>
+
+      {/* ── Lightbox Image Modal ─────────────────────────────────────── */}
+      {lightboxImage && (
+        <div 
+          onClick={() => setLightboxImage(null)}
+          className="fixed inset-0 bg-black/85 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 cursor-zoom-out animate-fadeIn"
+        >
+          <style>{`
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+          `}</style>
+          <div className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-xl border border-white/10 shadow-2xl">
+            <img 
+              src={lightboxImage} 
+              alt="Review attachment zoomed" 
+              className="w-full h-full max-h-[85vh] object-contain"
+            />
+            <button 
+              onClick={() => setLightboxImage(null)}
+              className="absolute top-4 right-4 bg-black/40 hover:bg-black/60 text-white rounded-full p-2 flex items-center justify-center transition border border-white/10"
+              aria-label="Close lightbox"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
     </section>
   );
 }
