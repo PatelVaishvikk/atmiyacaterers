@@ -132,7 +132,7 @@ function ReviewCard({ review, onImageClick }) {
 
       <div className="border-t border-gray-50" />
 
-      <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+      <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line break-words">
         &ldquo;{review.review}&rdquo;
       </p>
 
